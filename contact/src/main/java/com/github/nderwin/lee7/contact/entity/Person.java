@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 nde.
+ * Copyright 2014 Nathan Erwin.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nde.contact.entity;
+package com.github.nderwin.lee7.contact.entity;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -28,7 +28,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 /**
  * An individual person.
  *
- * @author nde
+ * @author nderwin
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)

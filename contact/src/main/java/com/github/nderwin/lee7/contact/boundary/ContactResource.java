@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 nde.
+ * Copyright 2014 Nathan Erwin.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nde.contact.boundary;
+package com.github.nderwin.lee7.contact.boundary;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -31,14 +31,14 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import nde.contact.entity.Organization;
-import nde.contact.entity.LegalEntity;
-import nde.contact.entity.Person;
+import com.github.nderwin.lee7.contact.entity.Organization;
+import com.github.nderwin.lee7.contact.entity.LegalEntity;
+import com.github.nderwin.lee7.contact.entity.Person;
 
 /**
  * A RESTful web service that provides CRUD operations for contacts.
  *
- * @author nde
+ * @author nderwin
  */
 @Stateless
 @LocalBean

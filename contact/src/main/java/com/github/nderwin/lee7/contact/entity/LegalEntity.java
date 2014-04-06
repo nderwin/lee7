@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 nde.
+ * Copyright 2014 Nathan Erwin.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nde.contact.entity;
+package com.github.nderwin.lee7.contact.entity;
 
 import java.io.Serializable;
 import javax.persistence.Column;
@@ -27,7 +27,7 @@ import javax.persistence.InheritanceType;
 /**
  * A legally recognized entity.
  *
- * @author nde
+ * @author nderwin
  */
 @Entity(name = "LegalEntity")
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)

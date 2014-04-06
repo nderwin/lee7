@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 nde.
+ * Copyright 2014 Nathan Erwin.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nde.contact;
+package com.github.nderwin.lee7.contact;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
@@ -21,7 +21,7 @@ import javax.ws.rs.core.Application;
 /**
  * Minimal configuration for enabling REST Web Services.
  *
- * @author nde
+ * @author nderwin
  */
 @ApplicationPath("resources")
 public class ApplicationConfig extends Application {

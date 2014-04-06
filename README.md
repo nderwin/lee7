@@ -1,4 +1,4 @@
-lee7
-====
+Project lee7
+============
 
-Learning Java EE 7
+This project is for learing about Java Enterprise Edition 7.

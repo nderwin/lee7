@@ -15,8 +15,6 @@
  */
 package com.github.nderwin.lee7.contact.boundary;
 
-import java.util.Collection;
-import java.util.Collections;
 import javax.ejb.Stateless;
 import javax.ejb.LocalBean;
 import javax.ejb.TransactionAttribute;
@@ -34,6 +32,10 @@ import javax.ws.rs.core.Response;
 import com.github.nderwin.lee7.contact.entity.Organization;
 import com.github.nderwin.lee7.contact.entity.LegalEntity;
 import com.github.nderwin.lee7.contact.entity.Person;
+import java.util.LinkedList;
+import java.util.List;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.POST;
 
 /**
  * A RESTful web service that provides CRUD operations for contacts.
@@ -53,7 +55,7 @@ public class ContactResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response get() {
-        Collection<LegalEntity> les = Collections.EMPTY_LIST;
+        List<LegalEntity> les = new LinkedList<>();
 
         les.addAll(em.createQuery("SELECT p FROM Person p", Person.class).getResultList());
         les.addAll(em.createQuery("SELECT o FROM Organization o", Organization.class).getResultList());
@@ -80,5 +82,25 @@ public class ContactResource {
         em.persist(entity);
 
         return Response.status(Response.Status.ACCEPTED).entity(entity).build();
+    }
+    
+    @POST
+    @Path("post/person")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response postPerson(@FormParam("givenName") final String givenName, @FormParam("surname") final String surname) {
+        Person person = new Person(surname, givenName);
+        em.persist(person);
+        return Response.accepted().entity(person).build();
+    }
+    
+    @POST
+    @Path("post/organization")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response postOrganization(@FormParam("name") final String name) {
+        Organization org = new Organization(name);
+        em.persist(org);
+        return Response.accepted().entity(org).build();
     }
 }

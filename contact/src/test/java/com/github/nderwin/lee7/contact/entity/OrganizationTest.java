@@ -26,7 +26,7 @@ public class OrganizationTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructor() {
-        new Organization(null);
+        Organization instance = new Organization(null);
     }
     
     @Test(expected = IllegalArgumentException.class)

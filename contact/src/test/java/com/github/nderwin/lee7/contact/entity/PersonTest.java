@@ -25,7 +25,7 @@ public class PersonTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructor() {
-        new Person("", null);
+        Person testMe = new Person("", null);
     }
 
     @Test(expected = IllegalArgumentException.class)

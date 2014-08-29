@@ -59,7 +59,7 @@
         <dependency>
             <groupId>org.jboss.spec</groupId>
             <artifactId>jboss-javaee-7.0</artifactId>
-            <version>1.0.0.Final</version>
+            <version>1.0.1.Final</version>
             <type>pom</type>
             <scope>provided</scope>
         </dependency>
@@ -170,22 +170,22 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
-                <version>3.3</version>
+                <version>3.4</version>
                 <configuration>
-                    <skipDeploy>true</skipDeploy><!-- don't deploy site with maven-site-plugin -->
+                    <skipDeploy>true</skipDeploy>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-scm-publish-plugin</artifactId>
-                <version>1.0</version>
+                <version>1.1</version>
                 <configuration>
-                    <content>${project.build.directory}/site</content><!-- mono-module doesn't require site:stage -->
+                    <content>${project.build.directory}/site</content>
                 </configuration>
                 <executions>
                     <execution>
                         <id>scm-publish</id>
-                        <phase>site-deploy</phase><!-- deploy site with maven-scm-publish-plugin -->
+                        <phase>site-deploy</phase>
                         <goals>
                             <goal>publish-scm</goal>
                         </goals>

@@ -41,6 +41,7 @@ import javax.ws.rs.core.Response;
 @LocalBean
 @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 @Path("organization")
+@Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class OrganizationResource {
 
@@ -48,7 +49,7 @@ public class OrganizationResource {
     EntityManager em;
 
     @GET
-    @Path("get/{id}")
+    @Path("{id}")
     public Response getOrganization(@PathParam("id") final Long id) {
         Organization c = em.find(Organization.class, id);
         return Response.ok(c).build();
@@ -57,7 +58,6 @@ public class OrganizationResource {
     @POST
     @Path("post")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.APPLICATION_JSON)
     public Response postOrganization(@FormParam("name") final String name) {
         Organization org = new Organization(name);
         em.persist(org);

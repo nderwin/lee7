@@ -4,7 +4,7 @@
 
     <groupId>nde</groupId>
     <artifactId>contact</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <name>Contact</name>
@@ -63,7 +63,7 @@
             <type>pom</type>
             <scope>provided</scope>
         </dependency>
-
+        
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -195,6 +195,36 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.liquibase</groupId>
+                        <artifactId>liquibase-maven-plugin</artifactId>
+                        <version>3.2.2</version>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.postgresql</groupId>
+                                <artifactId>postgresql</artifactId>
+                                <version>9.3-1102-jdbc41</version>
+                            </dependency>
+                        </dependencies>
+                        <executions>
+                            <execution>
+                                <phase>process-test-resources</phase>
+                                <goals>
+                                    <goal>update</goal>
+                                </goals>
+                                <configuration>
+                                    <driver>org.postgresql.Driver</driver>
+                                    <url>jdbc:postgresql://localhost:5432/lee7_test</url>
+                                    <propertyFile>target/classes/conf/liquibase.test.properties</propertyFile>
+                                    <propertyFileWillOverride>true</propertyFileWillOverride>
+                                    <changeLogFile>target/classes/db/changelog.xml</changeLogFile>
+                                    <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+                                    <changelogSchemaName>contact</changelogSchemaName>
+                                    <defaultSchemaName>contact</defaultSchemaName>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <version>2.17</version>
@@ -218,6 +248,46 @@
                                     <goal>integration-test</goal>
                                     <goal>verify</goal>
                                 </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <id>update-dev-database</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.liquibase</groupId>
+                        <artifactId>liquibase-maven-plugin</artifactId>
+                        <version>3.2.2</version>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.postgresql</groupId>
+                                <artifactId>postgresql</artifactId>
+                                <version>9.3-1102-jdbc41</version>
+                            </dependency>
+                        </dependencies>
+                        <executions>
+                            <execution>
+                                <phase>process-test-resources</phase>
+                                <goals>
+                                    <goal>update</goal>
+                                </goals>
+                                <configuration>
+                                    <driver>org.postgresql.Driver</driver>
+                                    <url>jdbc:postgresql://localhost:5432/lee7</url>
+                                    <propertyFile>target/classes/conf/liquibase.dev.properties</propertyFile>
+                                    <propertyFileWillOverride>true</propertyFileWillOverride>
+                                    <changeLogFile>src/main/resources/db/changelog.xml</changeLogFile>
+                                    <promptOnNonLocalDatabase>true</promptOnNonLocalDatabase>
+                                    <changelogSchemaName>contact</changelogSchemaName>
+                                    <defaultSchemaName>contact</defaultSchemaName>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>

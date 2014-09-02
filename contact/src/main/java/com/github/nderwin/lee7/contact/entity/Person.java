@@ -21,6 +21,8 @@ import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -35,25 +37,23 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Entity(name = "Person")
 @Table(schema = "contact", name = "person")
 public class Person extends LegalEntity implements Serializable {
-
-    private static final long serialVersionUID = -6010293547035868894L;
-
+    
+    private static final long serialVersionUID = -3735364287245307501L;
+    
     @Basic
     @Column(name = "surname")
     private String surname;
 
     @Basic(optional = false)
     @Column(name = "givenname", nullable = false)
+    @NotNull
+    @Size(min = 1, max = 50)
     private String givenName;
-
+    
     protected Person() {
     }
 
     public Person(final String surname, final String givenName) {
-        if (givenName == null || givenName.isEmpty()) {
-            throw new IllegalArgumentException("givenName must contain a value");
-        }
-
         this.surname = surname;
         this.givenName = givenName;
     }
@@ -63,7 +63,7 @@ public class Person extends LegalEntity implements Serializable {
     }
 
     public void setSurname(final String surname) {
-        this.surname = surname;
+       this.surname = surname;
     }
 
     public String getGivenName() {
@@ -71,19 +71,12 @@ public class Person extends LegalEntity implements Serializable {
     }
 
     public void setGivenName(final String givenName) {
-        if (givenName == null || givenName.isEmpty()) {
-            throw new IllegalArgumentException("givenName must contain a value");
-        }
-
         this.givenName = givenName;
     }
-
+    
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 53 * hash + Objects.hashCode(this.surname);
-        hash = 53 * hash + Objects.hashCode(this.givenName);
-        return hash;
+        return Objects.hash(this.surname, this.givenName);
     }
 
     @Override

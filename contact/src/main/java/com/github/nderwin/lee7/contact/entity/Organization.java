@@ -21,6 +21,8 @@ import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -36,20 +38,18 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(schema = "contact", name = "organization")
 public class Organization extends LegalEntity implements Serializable {
 
-    private static final long serialVersionUID = 542507467814592302L;
+    private static final long serialVersionUID = -7797691064923370946L;
 
     @Basic(optional = false)
     @Column(name = "name", nullable = false)
+    @NotNull
+    @Size(min = 1, max = 50)
     private String name;
 
     protected Organization() {
     }
 
     public Organization(final String name) {
-        if (name == null || name.isEmpty()) {
-            throw new IllegalArgumentException("name must contain a value");
-        }
-
         this.name = name;
     }
 
@@ -58,18 +58,12 @@ public class Organization extends LegalEntity implements Serializable {
     }
 
     public void setName(final String name) {
-        if (name == null || name.isEmpty()) {
-            throw new IllegalArgumentException("name must contain a value");
-        }
-
         this.name = name;
     }
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 31 * hash + Objects.hashCode(this.name);
-        return hash;
+        return Objects.hash(this.name);
     }
 
     @Override

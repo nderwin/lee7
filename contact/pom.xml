@@ -90,6 +90,14 @@
             <artifactId>arquillian-container-test-api</artifactId>
             <scope>test</scope>
         </dependency>
+        
+        <!-- Hibernate Validator -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>5.1.2.Final</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

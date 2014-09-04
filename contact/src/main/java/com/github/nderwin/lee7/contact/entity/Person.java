@@ -41,11 +41,11 @@ public class Person extends LegalEntity implements Serializable {
     private static final long serialVersionUID = -3735364287245307501L;
     
     @Basic
-    @Column(name = "surname")
+    @Column(name = "surname", length = 50)
     private String surname;
 
     @Basic(optional = false)
-    @Column(name = "givenname", nullable = false)
+    @Column(name = "givenname", nullable = false, length = 50)
     @NotNull
     @Size(min = 1, max = 50)
     private String givenName;

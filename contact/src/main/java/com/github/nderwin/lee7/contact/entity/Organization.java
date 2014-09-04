@@ -41,7 +41,7 @@ public class Organization extends LegalEntity implements Serializable {
     private static final long serialVersionUID = -7797691064923370946L;
 
     @Basic(optional = false)
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, length = 50)
     @NotNull
     @Size(min = 1, max = 50)
     private String name;

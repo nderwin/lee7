@@ -213,11 +213,9 @@
                                 </goals>
                                 <configuration>
                                     <driver>org.postgresql.Driver</driver>
-                                    <url>jdbc:postgresql://localhost:5432/lee7_test</url>
                                     <propertyFile>target/classes/conf/liquibase.test.properties</propertyFile>
                                     <propertyFileWillOverride>true</propertyFileWillOverride>
                                     <changeLogFile>target/classes/db/changelog.xml</changeLogFile>
-                                    <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
                                     <changelogSchemaName>contact</changelogSchemaName>
                                     <defaultSchemaName>contact</defaultSchemaName>
                                 </configuration>
@@ -279,12 +277,9 @@
                                     <goal>update</goal>
                                 </goals>
                                 <configuration>
-                                    <driver>org.postgresql.Driver</driver>
-                                    <url>jdbc:postgresql://localhost:5432/lee7</url>
                                     <propertyFile>target/classes/conf/liquibase.dev.properties</propertyFile>
                                     <propertyFileWillOverride>true</propertyFileWillOverride>
                                     <changeLogFile>src/main/resources/db/changelog.xml</changeLogFile>
-                                    <promptOnNonLocalDatabase>true</promptOnNonLocalDatabase>
                                     <changelogSchemaName>contact</changelogSchemaName>
                                     <defaultSchemaName>contact</defaultSchemaName>
                                 </configuration>

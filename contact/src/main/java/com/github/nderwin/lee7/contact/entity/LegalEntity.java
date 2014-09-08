@@ -24,6 +24,7 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.SequenceGenerator;
+import javax.xml.bind.annotation.XmlID;
 
 /**
  * A legally recognized entity.
@@ -40,6 +41,7 @@ public abstract class LegalEntity implements Serializable {
     @SequenceGenerator(schema = "contact", name = "legal_entity_seq", sequenceName = "legal_entity_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "legal_entity_seq")
     @Column(name = "id", nullable = false)
+    @XmlID
     private Long id;
 
     public Long getId() {

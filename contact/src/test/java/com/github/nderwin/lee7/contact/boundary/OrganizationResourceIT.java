@@ -16,6 +16,8 @@
 package com.github.nderwin.lee7.contact.boundary;
 
 import com.github.nderwin.lee7.contact.entity.Organization;
+import java.io.Serializable;
+import java.lang.reflect.Field;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -41,14 +43,14 @@ import static org.junit.Assert.*;
  * @author nderwin
  */
 @RunWith(Arquillian.class)
-public class OrganizationResourceIT {
+public class OrganizationResourceIT implements Serializable {
 
     @Inject
     private OrganizationResource testMe;
-    
+
     @Inject
     private UserTransaction utx;
-    
+
     @PersistenceContext
     EntityManager em;
 
@@ -80,7 +82,7 @@ public class OrganizationResourceIT {
     public void setUp() throws Exception {
         utx.begin();
         em.joinTransaction();
-        
+
         seedOrg = new Organization("Seed Organization");
         em.persist(seedOrg);
 
@@ -91,7 +93,7 @@ public class OrganizationResourceIT {
     public void tearDown() throws Exception {
         utx.begin();
         em.joinTransaction();
-        
+
         seedOrg = em.merge(seedOrg);
         em.remove(seedOrg);
 
@@ -108,9 +110,22 @@ public class OrganizationResourceIT {
 
     @Test
     public void testPostOrganization() throws Exception {
-        Response result = testMe.postOrganization("Test Org");
-        assertEquals(Response.Status.ACCEPTED.getStatusCode(), result.getStatus());
-        assertNotNull(result.getEntity());
-        assertEquals("Test Org", ((Organization) result.getEntity()).getName());
+        Response result = testMe.postOrganization(new Organization("Test Org"));
+        assertEquals(Response.Status.CREATED.getStatusCode(), result.getStatus());
+        assertTrue(result.getHeaders().containsKey("Location"));
+        assertTrue(result.getHeaderString("Location").matches("^.*organizations/[0-9]*$"));
+    }
+
+    @Test
+    public void testPostOrganizationWithId() throws Exception {
+        Organization org = new Organization("Test Org");
+
+        // force an id into the object we want persisted
+        Field f = org.getClass().getSuperclass().getDeclaredField("id");
+        f.setAccessible(true);
+        f.set(org, 12345L);
+
+        Response result = testMe.postOrganization(org);
+        assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
     }
 }

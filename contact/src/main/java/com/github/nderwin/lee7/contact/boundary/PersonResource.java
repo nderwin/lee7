@@ -16,14 +16,16 @@
 package com.github.nderwin.lee7.contact.boundary;
 
 import com.github.nderwin.lee7.contact.entity.Person;
+import java.net.URI;
+import java.net.URISyntaxException;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -40,7 +42,7 @@ import javax.ws.rs.core.Response;
 @Stateless
 @LocalBean
 @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-@Path("person")
+@Path("people")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class PersonResource {
@@ -49,20 +51,21 @@ public class PersonResource {
     EntityManager em;
 
     @GET
-    @Path("{id}")
+    @Path("/{id}")
     public Response getPerson(@PathParam("id") final Long id) {
         Person p = em.find(Person.class, id);
         return Response.ok(p).build();
     }
 
     @POST
-    @Path("post")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response postPerson(@FormParam("givenName") final String givenName, @FormParam("surname") final String surname) {
-        Person person = new Person(surname, givenName);
-        em.persist(person);
-        return Response.accepted().entity(person).build();
+    @Path("/")
+    public Response postPerson(final Person person) throws URISyntaxException {
+        try {
+            em.persist(person);
+            return Response.created(new URI("people/" + person.getId().toString())).build();
+        } catch (PersistenceException ex) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
     }
-    
+
 }

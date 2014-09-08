@@ -13,10 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.github.nderwin.lee7.contact.entity;
 
+import java.util.Set;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  *
@@ -24,14 +31,26 @@ import org.junit.Test;
  */
 public class OrganizationTest {
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testConstructor() {
-        Organization instance = new Organization(null);
+    private Validator validator;
+
+    @Before
+    public void setUp() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
     }
-    
-    @Test(expected = IllegalArgumentException.class)
+
+    @Test
+    public void testConstructor() {
+        Organization testMe = new Organization(null);
+        Set<ConstraintViolation<Organization>> violations = validator.validate(testMe);
+        assertEquals(violations.size(), 1);
+    }
+
+    @Test
     public void testSetName() {
-        Organization instance = new Organization("ACME Supply Company");
-        instance.setName(null);
+        Organization testMe = new Organization("ACME Supply Company");
+        testMe.setName(null);
+        Set<ConstraintViolation<Organization>> violations = validator.validate(testMe);
+        assertEquals(violations.size(), 1);
     }
 }

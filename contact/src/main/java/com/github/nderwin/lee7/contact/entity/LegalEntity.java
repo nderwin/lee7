@@ -23,6 +23,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.SequenceGenerator;
 
 /**
  * A legally recognized entity.
@@ -36,7 +37,8 @@ public abstract class LegalEntity implements Serializable {
     private static final long serialVersionUID = -1822203393624550172L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @SequenceGenerator(schema = "contact", name = "legal_entity_seq", sequenceName = "legal_entity_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "legal_entity_seq")
     @Column(name = "id", nullable = false)
     private Long id;
 

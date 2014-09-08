@@ -15,7 +15,15 @@
  */
 package com.github.nderwin.lee7.contact.entity;
 
+import java.util.Set;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  *
@@ -23,14 +31,26 @@ import org.junit.Test;
  */
 public class PersonTest {
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testConstructor() {
-        Person testMe = new Person("", null);
+    private Validator validator;
+
+    @Before
+    public void setUp() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
+    public void testConstructor() {
+        Person testMe = new Person("", null);
+        Set<ConstraintViolation<Person>> violations = validator.validate(testMe);
+        assertEquals(violations.size(), 1);
+    }
+
+    @Test
     public void testSetGivenName() {
         Person testMe = new Person("Smith", "John");
         testMe.setGivenName(null);
+        Set<ConstraintViolation<Person>> violations = validator.validate(testMe);
+        assertEquals(violations.size(), 1);
     }
 }

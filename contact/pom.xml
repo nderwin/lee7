@@ -4,7 +4,7 @@
 
     <groupId>nde</groupId>
     <artifactId>contact</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <name>Contact</name>
@@ -63,7 +63,7 @@
             <type>pom</type>
             <scope>provided</scope>
         </dependency>
-
+        
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -88,6 +88,14 @@
         <dependency>
             <groupId>org.jboss.arquillian.container</groupId>
             <artifactId>arquillian-container-test-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+        <!-- Hibernate Validator -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>5.1.2.Final</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -142,33 +150,6 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.17</version>
-                <configuration>
-                    <parallel>methods</parallel>
-                    <threadCount>10</threadCount>
-                    <systemPropertyVariables>
-                        <project.artifactId>${project.artifactId}</project.artifactId>
-                        <arquillian.launch>wildfly</arquillian.launch>
-                    </systemPropertyVariables>
-                    <systemProperties>
-                        <property>
-                            <name>java.util.logging.manager</name>
-                            <value>org.jboss.logmanager.LogManager</value>
-                        </property>
-                    </systemProperties>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
                 <version>3.4</version>
                 <configuration>
@@ -204,4 +185,109 @@
             </plugin>
         </plugins>
     </reporting>
+    
+    <profiles>
+        <profile>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <id>integration-test</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.liquibase</groupId>
+                        <artifactId>liquibase-maven-plugin</artifactId>
+                        <version>3.2.2</version>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.postgresql</groupId>
+                                <artifactId>postgresql</artifactId>
+                                <version>9.3-1102-jdbc41</version>
+                            </dependency>
+                        </dependencies>
+                        <executions>
+                            <execution>
+                                <phase>process-test-resources</phase>
+                                <goals>
+                                    <goal>update</goal>
+                                </goals>
+                                <configuration>
+                                    <driver>org.postgresql.Driver</driver>
+                                    <propertyFile>target/classes/conf/liquibase.test.properties</propertyFile>
+                                    <propertyFileWillOverride>true</propertyFileWillOverride>
+                                    <changeLogFile>target/classes/db/changelog.xml</changeLogFile>
+                                    <changelogSchemaName>contact</changelogSchemaName>
+                                    <defaultSchemaName>contact</defaultSchemaName>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.17</version>
+                        <configuration>
+                            <parallel>methods</parallel>
+                            <threadCount>10</threadCount>
+                            <systemPropertyVariables>
+                                <project.artifactId>${project.artifactId}</project.artifactId>
+                                <arquillian.launch>wildfly</arquillian.launch>
+                            </systemPropertyVariables>
+                            <systemProperties>
+                                <property>
+                                    <name>java.util.logging.manager</name>
+                                    <value>org.jboss.logmanager.LogManager</value>
+                                </property>
+                            </systemProperties>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <id>update-dev-database</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.liquibase</groupId>
+                        <artifactId>liquibase-maven-plugin</artifactId>
+                        <version>3.2.2</version>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.postgresql</groupId>
+                                <artifactId>postgresql</artifactId>
+                                <version>9.3-1102-jdbc41</version>
+                            </dependency>
+                        </dependencies>
+                        <executions>
+                            <execution>
+                                <phase>process-test-resources</phase>
+                                <goals>
+                                    <goal>update</goal>
+                                </goals>
+                                <configuration>
+                                    <propertyFile>target/classes/conf/liquibase.dev.properties</propertyFile>
+                                    <propertyFileWillOverride>true</propertyFileWillOverride>
+                                    <changeLogFile>src/main/resources/db/changelog.xml</changeLogFile>
+                                    <changelogSchemaName>contact</changelogSchemaName>
+                                    <defaultSchemaName>contact</defaultSchemaName>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

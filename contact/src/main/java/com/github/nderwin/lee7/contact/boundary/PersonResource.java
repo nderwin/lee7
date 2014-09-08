@@ -41,6 +41,7 @@ import javax.ws.rs.core.Response;
 @LocalBean
 @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 @Path("person")
+@Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class PersonResource {
 
@@ -48,7 +49,7 @@ public class PersonResource {
     EntityManager em;
 
     @GET
-    @Path("get/{id}")
+    @Path("{id}")
     public Response getPerson(@PathParam("id") final Long id) {
         Person p = em.find(Person.class, id);
         return Response.ok(p).build();

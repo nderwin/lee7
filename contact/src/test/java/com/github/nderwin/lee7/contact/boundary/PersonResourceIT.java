@@ -15,7 +15,7 @@
  */
 package com.github.nderwin.lee7.contact.boundary;
 
-import com.github.nderwin.lee7.contact.entity.Organization;
+import com.github.nderwin.lee7.contact.entity.Person;
 import java.lang.reflect.Field;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -42,10 +42,10 @@ import static org.junit.Assert.*;
  * @author nderwin
  */
 @RunWith(Arquillian.class)
-public class OrganizationResourceIT {
+public class PersonResourceIT {
 
     @Inject
-    private OrganizationResource testMe;
+    private PersonResource testMe;
 
     @Inject
     private UserTransaction utx;
@@ -53,17 +53,17 @@ public class OrganizationResourceIT {
     @PersistenceContext
     EntityManager em;
 
-    private Organization seedOrg;
+    private Person seedPerson;
 
-    public OrganizationResourceIT() {
+    public PersonResourceIT() {
     }
 
     @Deployment
     public static Archive<?> createDeployment() {
         WebArchive wa = ShrinkWrap.create(WebArchive.class, "test.war");
-        wa.addClass(OrganizationResource.class);
+        wa.addClass(PersonResource.class);
         wa.addClass(PagingListWrapper.class);
-        wa.addPackage(Organization.class.getPackage());
+        wa.addPackage(Person.class.getPackage());
         wa.addAsResource("persistence.xml", "META-INF/persistence.xml");
         wa.addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
 
@@ -83,8 +83,8 @@ public class OrganizationResourceIT {
         utx.begin();
         em.joinTransaction();
 
-        seedOrg = new Organization("Seed Organization");
-        em.persist(seedOrg);
+        seedPerson = new Person("Person", "Seed");
+        em.persist(seedPerson);
 
         utx.commit();
     }
@@ -94,31 +94,32 @@ public class OrganizationResourceIT {
         utx.begin();
         em.joinTransaction();
 
-        seedOrg = em.merge(seedOrg);
-        em.remove(seedOrg);
+        seedPerson = em.merge(seedPerson);
+        em.remove(seedPerson);
 
         utx.commit();
     }
 
     @Test
     public void testGet() throws Exception {
-        Response result = testMe.get(seedOrg.getId());
+        Response result = testMe.get(seedPerson.getId());
         assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
         assertNotNull(result.getEntity());
-        assertEquals(seedOrg.getName(), ((Organization) result.getEntity()).getName());
+        assertEquals(seedPerson.getSurname(), ((Person) result.getEntity()).getSurname());
+        assertEquals(seedPerson.getGivenName(), ((Person) result.getEntity()).getGivenName());
     }
 
     @Test
     public void testPost() throws Exception {
-        Response result = testMe.save(new Organization("Test Org"));
+        Response result = testMe.save(new Person("Person", "Test"));
         assertEquals(Response.Status.CREATED.getStatusCode(), result.getStatus());
         assertTrue(result.getHeaders().containsKey("Location"));
-        assertTrue(result.getHeaderString("Location").matches("^.*organizations/[0-9]*$"));
+        assertTrue(result.getHeaderString("Location").matches("^.*people/[0-9]*$"));
     }
 
     @Test
     public void testPostWithId() throws Exception {
-        Organization org = createWithId(Long.MAX_VALUE, "Test Org");
+        Person org = createWithId(Long.MAX_VALUE, "Person", "Test");
 
         Response result = testMe.save(org);
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
@@ -126,23 +127,23 @@ public class OrganizationResourceIT {
     
     @Test
     public void testPut() throws Exception {
-        Organization org = new Organization("Test Org");
+        Person org = new Person("Person", "Test");
         Response result = testMe.save(org);
 
-        Long id = Long.parseLong(result.getHeaderString("Location").split("organizations/")[1]);
-        org = (Organization) testMe.get(id).getEntity();
-        org.setName("Updated Org");
+        Long id = Long.parseLong(result.getHeaderString("Location").split("people/")[1]);
+        org = (Person) testMe.get(id).getEntity();
+        org.setGivenName("Updated");
 
         result = testMe.update(org);
         assertEquals(Response.Status.NO_CONTENT.getStatusCode(), result.getStatus());
 
-        org = (Organization) testMe.get(id).getEntity();
-        assertEquals("Updated Org", org.getName());
+        org = (Person) testMe.get(id).getEntity();
+        assertEquals("Updated", org.getGivenName());
     }
 
     @Test
     public void testPutNotExisting() throws Exception {
-        Organization org = createWithId(Long.MIN_VALUE, "Test Org");
+        Person org = createWithId(Long.MIN_VALUE, "Person", "Test");
 
         Response result = testMe.update(org);
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
@@ -150,17 +151,17 @@ public class OrganizationResourceIT {
     
     @Test
     public void testPutNewInstance() {
-        Response result = testMe.update(new Organization("Foo"));
+        Response result = testMe.update(new Person("Person", "Foo"));
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
     }
     
     @Test
     public void testDelete() throws Exception {
-        Organization org = new Organization("Deleted Org");
+        Person org = new Person("Person", "Delete");
         Response result = testMe.save(org);
 
-        Long id = Long.parseLong(result.getHeaderString("Location").split("organizations/")[1]);
-        org = (Organization) testMe.get(id).getEntity();
+        Long id = Long.parseLong(result.getHeaderString("Location").split("people/")[1]);
+        org = (Person) testMe.get(id).getEntity();
 
         result = testMe.delete(org);
         assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
@@ -168,7 +169,7 @@ public class OrganizationResourceIT {
     
     @Test
     public void testDeleteNonExisting() throws Exception {
-        Organization org = createWithId(Long.MIN_VALUE, "Delete Org");
+        Person org = createWithId(Long.MIN_VALUE, "Person", "Delete");
 
         Response result = testMe.delete(org);
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
@@ -176,7 +177,7 @@ public class OrganizationResourceIT {
     
     @Test
     public void testGetAll() throws Exception {
-        PagingListWrapper<Organization> result = testMe.getAll(50, 0);
+        PagingListWrapper<Person> result = testMe.getAll(50, 0);
         assertNotNull(result);
         assertNotNull(result.getData());
         assertFalse(result.getData().isEmpty());
@@ -184,20 +185,20 @@ public class OrganizationResourceIT {
     
     @Test
     public void testGetAllBadLimit() {
-        PagingListWrapper<Organization> result = testMe.getAll(-50, 0);
+        PagingListWrapper<Person> result = testMe.getAll(-50, 0);
         assertTrue(result.getData().isEmpty());
         assertEquals(0, result.getLimit());
     }
     
     @Test
     public void testGetAllBadOffset() {
-        PagingListWrapper<Organization> result = testMe.getAll(50, -1);
+        PagingListWrapper<Person> result = testMe.getAll(50, -1);
         assertTrue(result.getData().isEmpty());
         assertEquals(0, result.getOffset());
     }
     
-    private Organization createWithId(final Long id, final String name) throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
-        Organization org = new Organization(name);
+    private Person createWithId(final Long id, final String surname, final String givenName) throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+        Person org = new Person(surname, givenName);
         
         // force an id into the object we want persisted
         Field f = org.getClass().getSuperclass().getDeclaredField("id");

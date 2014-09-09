@@ -36,7 +36,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Entity(name = "Organization")
 @Table(schema = "contact", name = "organization")
 @XmlRootElement
-@XmlAccessorType(XmlAccessType.PROPERTY)
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Organization extends LegalEntity implements Serializable {
 
     private static final long serialVersionUID = -7797691064923370946L;

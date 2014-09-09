@@ -36,13 +36,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Entity(name = "Person")
 @Table(schema = "contact", name = "person")
 @XmlRootElement
-@XmlAccessorType(XmlAccessType.PROPERTY)
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Person extends LegalEntity implements Serializable {
     
     private static final long serialVersionUID = -3735364287245307501L;
     
     @Basic
     @Column(name = "surname", length = 50)
+    @XmlElement
     private String surname;
 
     @Basic(optional = false)

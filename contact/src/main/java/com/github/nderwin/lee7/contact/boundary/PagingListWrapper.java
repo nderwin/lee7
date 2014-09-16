@@ -16,7 +16,12 @@
 
 package com.github.nderwin.lee7.contact.boundary;
 
+import java.util.Collections;
 import java.util.List;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * This class wraps collections of resources so that they can be navigated
@@ -25,13 +30,22 @@ import java.util.List;
  * @author nderwin
  * @param <T> the type of resource that is being paged
  */
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class PagingListWrapper<T> {
 
+    @XmlElement
     private int limit;
     
+    @XmlElement
     private int offset;
     
+    @XmlElement
     private List<T> data;
+    
+    public PagingListWrapper() {
+        this(0, 0, Collections.EMPTY_LIST);
+    }
 
     public PagingListWrapper(final List<T> data) {
         this(0, 0, data);

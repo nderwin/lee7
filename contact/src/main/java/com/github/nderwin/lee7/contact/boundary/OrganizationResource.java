@@ -59,7 +59,7 @@ public class OrganizationResource {
     @GET
     @Path("/")
     public Response getAll(
-            @DefaultValue("0") @QueryParam("limit") final int limit, 
+            @DefaultValue("50") @QueryParam("limit") final int limit, 
             @DefaultValue("0") @QueryParam("offset") final int offset) {
         
         TypedQuery<Organization> q = em.createQuery("SELECT o FROM Organization o", Organization.class)

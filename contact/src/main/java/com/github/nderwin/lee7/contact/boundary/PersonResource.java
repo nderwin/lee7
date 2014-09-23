@@ -58,7 +58,7 @@ public class PersonResource {
     @GET
     @Path("/")
     public Response getAll(
-            @DefaultValue("0") @QueryParam("limit") final int limit, 
+            @DefaultValue("50") @QueryParam("limit") final int limit, 
             @DefaultValue("0") @QueryParam("offset") final int offset) {
         
         TypedQuery<Person> q = em.createQuery("SELECT p FROM Person p", Person.class)

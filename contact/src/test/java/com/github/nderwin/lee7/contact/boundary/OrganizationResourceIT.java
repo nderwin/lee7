@@ -29,13 +29,11 @@ import javax.ws.rs.core.Response;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.arquillian.junit.InSequence;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -49,15 +47,9 @@ import static org.junit.Assert.*;
 @RunAsClient
 public class OrganizationResourceIT {
 
-    static String crudId;
-    
-    static Organization crudOrg;
-    
     @ArquillianResource
     private URL contextPath;
     
-    private WebTarget target;
-
     public OrganizationResourceIT() {
     }
 
@@ -73,193 +65,215 @@ public class OrganizationResourceIT {
         return wa;
     }
 
-    @Before
-    public void setUp() {
-        Client client = ClientBuilder.newClient();
-        target = client.target(contextPath.toExternalForm())
-                .path(ApplicationConfig.class.getAnnotation(ApplicationPath.class).value())
-                .path(OrganizationResource.class.getAnnotation(Path.class).value());
-    }
-
     @Test
-    @InSequence(0)
-    public void testPost() throws Exception {
-        Response result = target.request().post(Entity.json(new Organization("Test Org")));
+    public void testPost() {
+        Response result = createTarget()
+                .request()
+                .post(Entity.json(new Organization("Test Org")));
 
         assertEquals(Response.Status.CREATED.getStatusCode(), result.getStatus());
         assertTrue(result.getHeaders().containsKey("Location"));
         assertTrue(result.getHeaderString("Location").matches("^.*" + OrganizationResource.class.getAnnotation(Path.class).value() + "/[0-9]*$"));
-        
-        crudId = result.getHeaderString("Location").split(OrganizationResource.class.getAnnotation(Path.class).value() + "/")[1];
     }
     
     @Test
-    @InSequence(1)
-    public void testGet() throws Exception {
-        target = target.path(crudId);
-
-        Response result = target.request().get();
+    public void testGet() {
+        Organization org = postAndGet("Test Org");
         
-        if (result.hasEntity()) {
-            crudOrg = result.readEntity(Organization.class);
-        }
-
-        assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
-        assertNotNull(crudOrg);
+        assertNotNull(org);
     }
 
     @Test
-    @InSequence(2)
-    public void testPut() throws Exception {
-        target = target.path(crudId);
+    public void testPut() {
+        Organization org = postAndGet("Test Org");
 
-        crudOrg.setName("Updated Org");
+        // update it
+        org.setName("Updated Org");
 
-        Response result = target.request().put(Entity.json(crudOrg));
+        Response result = createTarget()
+                .path(org.getId().toString())
+                .request()
+                .put(Entity.json(org));
         
         assertEquals(Response.Status.NO_CONTENT.getStatusCode(), result.getStatus());
-    }
 
-    @Test
-    @InSequence(3)
-    public void testGetAfterPut() throws Exception {
-        target = target.path(crudId);
-        
-        Response result = target.request().get();
-        
-        if (result.hasEntity()) {
-            crudOrg = result.readEntity(Organization.class);
-        }
-        
+        // make sure it was updated
+        result = createTarget()
+                .path(org.getId().toString())
+                .request()
+                .get();
+
         assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
-        assertNotNull(crudOrg);
-        
-        assertEquals("Updated Org", crudOrg.getName());
+        org = result.readEntity(Organization.class);
+        assertNotNull(org);
+        assertEquals("Updated Org", org.getName());
     }
 
     @Test
-    @InSequence(4)
-    public void testPutDifferentEntityId() throws Exception {
-        target = target.path(crudId);
+    public void testPutDifferentEntityId() {
+        Organization org = postAndGet("Test Org");
         
-        Response result = target.request().put(Entity.json(createWithId(crudOrg.getId() + 1L, "Oops")));
+        Response result = createTarget()
+                .path(org.getId().toString())
+                .request()
+                .put(Entity.json(createWithId(org.getId() + 1L, "Oops")));
         
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
     }
 
     @Test
-    @InSequence(5)
-    public void testPutDifferentPathId() throws Exception {
-        target = target.path("" + (crudOrg.getId() + 1L));
+    public void testPutDifferentPathId() {
+        Organization org = postAndGet("Test Org");
         
-        Response result = target.request().put(Entity.json(createWithId(crudOrg.getId(), "Oops")));
+        Response result = createTarget()
+                .path("" + (org.getId() + 1L))
+                .request()
+                .put(Entity.json(createWithId(org.getId(), "Oops")));
         
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
     }
 
     @Test
-    @InSequence(6)
-    public void testGetAll() throws Exception {
-        target = target.queryParam("limit", 50).queryParam("offset", 0);
+    public void testGetAll() {
+        postAndGet("Test Org");
 
-        Response resp = target.request().get();
+        Response resp = createTarget()
+                .queryParam("limit", 50)
+                .queryParam("offset", 0)
+                .request()
+                .get();
 
         PagingListWrapper<Organization> result = resp.readEntity(PagingListWrapper.class);
 
         assertEquals(Response.Status.OK.getStatusCode(), resp.getStatus());
         assertNotNull(result);
         assertNotNull(result.getData());
-        assertEquals(1, result.getData().size());
+        assertNotEquals(0, result.getData().size());
         assertFalse(result.getData().isEmpty());
     }
 
     @Test
-    @InSequence(7)
-    public void testDelete() throws Exception {
-        target = target.path(crudId);
-        
-        Response result = target.request().delete();
+    public void testDelete() {
+        Organization org = postAndGet("Test Org");
+
+        Response result = createTarget()
+                .path(org.getId().toString())
+                .request()
+                .delete();
 
         assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
-    }
+        
+        result = createTarget()
+                .path(org.getId().toString())
+                .request()
+                .get();
 
-    @Test
-    @InSequence(8)
-    public void testGetAfterDelete() throws Exception {
-        target = target.path(crudId);
-        
-        Response result = target.request().get();
-        
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
-        
-        crudId = null;
-        crudOrg = null;
     }
 
     @Test
-    public void testPostWithId() throws Exception {
+    public void testPostWithId() {
         Organization org = createWithId(Long.MAX_VALUE, "Test Org");
         
-        Response resp = target.request().post(Entity.json(org));
+        Response resp = createTarget()
+                .request()
+                .post(Entity.json(org));
 
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), resp.getStatus());
     }
 
     @Test
-    public void testPutNotExisting() throws Exception {
+    public void testPutNotExisting() {
         Organization org = createWithId(Long.MIN_VALUE, "Test Org");
 
-        target = target.path(org.getId().toString());
-        
-        Response result = target.request().put(Entity.json(org));
+        Response result = createTarget()
+                .path(org.getId().toString())
+                .request()
+                .put(Entity.json(org));
         
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
     }
 
     @Test
     public void testPutNewInstance() {
-        target = target.path("" + Long.MAX_VALUE);
-
-        Response result = target.request().put(Entity.json(new Organization("Foo")));
+        Response result = createTarget()
+                .path("" + Long.MAX_VALUE)
+                .request()
+                .put(Entity.json(new Organization("Foo")));
         
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
     }
 
     @Test
-    public void testDeleteNonExisting() throws Exception {
-        target = target.path("" + Long.MIN_VALUE);
-        
-        Response result = target.request().delete();
+    public void testDeleteNonExisting() {
+        Response result = createTarget()
+                .path("" + Long.MIN_VALUE)
+                .request()
+                .delete();
         
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
     }
 
     @Test
     public void testGetAllBadLimit() {
-        target = target.queryParam("limit", -50).queryParam("offset", 0);
-
-        Response resp = target.request().get();
+        Response resp = createTarget()
+                .queryParam("limit", -50)
+                .queryParam("offset", 0)
+                .request()
+                .get();
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), resp.getStatus());
     }
 
     @Test
     public void testGetAllBadOffset() {
-        target = target.queryParam("limit", 50).queryParam("offset", -1);
-
-        Response resp = target.request().get();
+        Response resp = createTarget()
+                .queryParam("limit", 50)
+                .queryParam("offset", -1)
+                .request()
+                .get();
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), resp.getStatus());
     }
 
-    private Organization createWithId(final Long id, final String name) throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+    private Organization createWithId(final Long id, final String name) {
         Organization org = new Organization(name);
 
-        // force an id into the object we want persisted
-        Field f = org.getClass().getSuperclass().getDeclaredField("id");
-        f.setAccessible(true);
-        f.set(org, id);
+        try {
+            // force an id into the object we want persisted
+            Field f = org.getClass().getSuperclass().getDeclaredField("id");
+            f.setAccessible(true);
+            f.set(org, id);
+        } catch (Exception ex) {
+        }
 
         return org;
+    }
+    
+    private WebTarget createTarget() {
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target(contextPath.toExternalForm())
+                .path(ApplicationConfig.class.getAnnotation(ApplicationPath.class).value())
+                .path(OrganizationResource.class.getAnnotation(Path.class).value());
+        
+        return target;
+    }
+    
+    private Organization postAndGet(final String name) {
+        Response result = createTarget()
+                .request()
+                .post(Entity.json(new Organization(name)));
+
+        assertEquals(Response.Status.CREATED.getStatusCode(), result.getStatus());
+
+        String id = result.getHeaderString("Location").split(OrganizationResource.class.getAnnotation(Path.class).value() + "/")[1];
+        result = createTarget()
+                .path(id)
+                .request()
+                .get();
+
+        assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
+
+        return result.readEntity(Organization.class);
     }
 }

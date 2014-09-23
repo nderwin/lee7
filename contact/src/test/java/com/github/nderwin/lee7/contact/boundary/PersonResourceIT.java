@@ -29,13 +29,11 @@ import javax.ws.rs.core.Response;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.arquillian.junit.InSequence;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -49,15 +47,9 @@ import static org.junit.Assert.*;
 @RunAsClient
 public class PersonResourceIT {
     
-    static String crudId;
-    
-    static Person crudPerson;
-    
     @ArquillianResource 
     private URL contextPath;
 
-    private WebTarget target;
-    
     public PersonResourceIT() {
     }
 
@@ -73,192 +65,215 @@ public class PersonResourceIT {
         return wa;
     }
     
-    @Before
-    public void setUp() {
-        Client client = ClientBuilder.newClient();
-        target = client.target(contextPath.toExternalForm())
-                .path(ApplicationConfig.class.getAnnotation(ApplicationPath.class).value())
-                .path(PersonResource.class.getAnnotation(Path.class).value());
-    }
-
     @Test
-    @InSequence(0)
-    public void testPost() throws Exception {
-        Response result = target.request().post(Entity.json(new Person("Person", "Test")));
+    public void testPost() {
+        Response result = createTarget()
+                .request()
+                .post(Entity.json(new Person("Person", "Test")));
 
         assertEquals(Response.Status.CREATED.getStatusCode(), result.getStatus());
         assertTrue(result.getHeaders().containsKey("Location"));
         assertTrue(result.getHeaderString("Location").matches("^.*" + PersonResource.class.getAnnotation(Path.class).value() + "/[0-9]*$"));
-        
-        crudId = result.getHeaderString("Location").split(PersonResource.class.getAnnotation(Path.class).value() + "/")[1];
     }
     
     @Test
-    @InSequence(1)
-    public void testGet() throws Exception {
-        target = target.path(crudId);
+    public void testGet() {
+        Person p = postAndGet("Person", "Test");
 
-        Response result = target.request().get();
-        
-        if (result.hasEntity()) {
-            crudPerson = result.readEntity(Person.class);
-        }
-
-        assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
-        assertNotNull(crudPerson);
+        assertNotNull(p);
     }
     
     @Test
-    @InSequence(2)
-    public void testPut() throws Exception {
-        target = target.path(crudId);
+    public void testPut() {
+        Person p = postAndGet("Person", "Test");
 
-        crudPerson.setGivenName("Updated");
+        // update it
+        p.setGivenName("Updated");
 
-        Response result = target.request().put(Entity.json(crudPerson));
+        Response result = createTarget()
+                .path(p.getId().toString())
+                .request()
+                .put(Entity.json(p));
         
         assertEquals(Response.Status.NO_CONTENT.getStatusCode(), result.getStatus());
+
+        // make sure it was updated
+        result = createTarget()
+                .path(p.getId().toString())
+                .request()
+                .get();
+
+        assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
+        p = result.readEntity(Person.class);
+        assertNotNull(p);
+        assertEquals("Updated", p.getGivenName());
     }
     
     @Test
-    @InSequence(3)
-    public void testGetAfterPut() throws Exception {
-        target = target.path(crudId);
-        
-        Response result = target.request().get();
-        
-        if (result.hasEntity()) {
-            crudPerson = result.readEntity(Person.class);
-        }
-        
-        assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
-        assertNotNull(crudPerson);
-        
-        assertEquals("Updated", crudPerson.getGivenName());
-    }
+    public void testPutDifferentEntityId() {
+        Person p = postAndGet("Person", "Test");
 
-    @Test
-    @InSequence(4)
-    public void testPutDifferentEntityId() throws Exception {
-        target = target.path(crudId);
-        
-        Response result = target.request().put(Entity.json(createWithId(crudPerson.getId() + 1L, "Person", "Oops")));
+        Response result = createTarget()
+                .path(p.getId().toString())
+                .request()
+                .put(Entity.json(createWithId(p.getId() + 1L, "Person", "Oops")));
         
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
     }
 
     @Test
-    @InSequence(5)
-    public void testPutDifferentPathId() throws Exception {
-        target = target.path("" + (crudPerson.getId() + 1L));
-        
-        Response result = target.request().put(Entity.json(createWithId(crudPerson.getId(), "Person", "Oops")));
+    public void testPutDifferentPathId() {
+        Person p = postAndGet("Person", "Test");
+
+        Response result = createTarget()
+                .path("" + (p.getId() + 1L))
+                .request()
+                .put(Entity.json(createWithId(p.getId(), "Person", "Oops")));
         
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
     }
 
     @Test
-    @InSequence(6)
-    public void testGetAll() throws Exception {
-        target = target.queryParam("limit", 50).queryParam("offset", 0);
-
-        Response resp = target.request().get();
+    public void testGetAll() {
+        postAndGet("Person", "Test");
+        
+        Response resp = createTarget()
+                .queryParam("limit", 50)
+                .queryParam("offset", 0)
+                .request()
+                .get();
 
         PagingListWrapper<Person> result = resp.readEntity(PagingListWrapper.class);
         
         assertEquals(Response.Status.OK.getStatusCode(), resp.getStatus());
         assertNotNull(result);
         assertNotNull(result.getData());
-        assertEquals(1, result.getData().size());
+        assertNotEquals(0, result.getData().size());
         assertFalse(result.getData().isEmpty());
     }
     
     @Test
-    @InSequence(7)
-    public void testDelete() throws Exception {
-        target = target.path(crudId);
+    public void testDelete() {
+        Person p = postAndGet("Person", "Test");
         
-        Response result = target.request().delete();
+        Response result = createTarget()
+                .path(p.getId().toString())
+                .request()
+                .delete();
 
         assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
-    }
-    
-    @Test
-    @InSequence(8)
-    public void testGetAfterDelete() throws Exception {
-        target = target.path(crudId);
         
-        Response result = target.request().get();
-        
+        result = createTarget()
+                .path(p.getId().toString())
+                .request()
+                .get();
+
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
-        
-        crudId = null;
-        crudPerson = null;
     }
 
     @Test
-    public void testPostWithId() throws Exception {
+    public void testPostWithId() {
         Person org = createWithId(Long.MAX_VALUE, "Person", "Test");
 
-        Response resp = target.request().post(Entity.json(org));
+        Response resp = createTarget()
+                .request()
+                .post(Entity.json(org));
 
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), resp.getStatus());
     }
     
     @Test
-    public void testPutNotExisting() throws Exception {
+    public void testPutNotExisting() {
         Person person = createWithId(Long.MIN_VALUE, "Person", "Test");
 
-        target = target.path(person.getId().toString());
-        Response result = target.request().put(Entity.json(person));
+        Response result = createTarget()
+                .path(person.getId().toString())
+                .request()
+                .put(Entity.json(person));
         
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
     }
     
     @Test
     public void testPutNewInstance() {
-        target = target.path("" + Long.MAX_VALUE);
-
-        Response result = target.request().put(Entity.json(new Person("Person", "Foo")));
+        Response result = createTarget()
+                .path("" + Long.MAX_VALUE)
+                .request()
+                .put(Entity.json(new Person("Person", "Foo")));
         
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
     }
     
     @Test
-    public void testDeleteNonExisting() throws Exception {
-        target = target.path("" + Long.MIN_VALUE);
-
-        Response result = target.request().delete();
+    public void testDeleteNonExisting() {
+        Response result = createTarget()
+                .path("" + Long.MIN_VALUE)
+                .request()
+                .delete();
 
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
     }
     
     @Test
     public void testGetAllBadLimit() {
-        target = target.queryParam("limit", -50).queryParam("offset", 0);
-
-        Response resp = target.request().get();
+        Response resp = createTarget()
+                .queryParam("limit", -50)
+                .queryParam("offset", 0)
+                .request()
+                .get();
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), resp.getStatus());
     }
     
     @Test
     public void testGetAllBadOffset() {
-        target = target.queryParam("limit", 50).queryParam("offset", -1);
-
-        Response resp = target.request().get();
+        Response resp = createTarget()
+                .queryParam("limit", 50)
+                .queryParam("offset", -1)
+                .request()
+                .get();
         
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), resp.getStatus());
     }
     
-    private Person createWithId(final Long id, final String surname, final String givenName) throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+    private Person createWithId(final Long id, final String surname, final String givenName) {
         Person org = new Person(surname, givenName);
-        
-        // force an id into the object we want persisted
-        Field f = org.getClass().getSuperclass().getDeclaredField("id");
-        f.setAccessible(true);
-        f.set(org, id);
+
+        try {
+            // force an id into the object we want persisted
+            Field f = org.getClass().getSuperclass().getDeclaredField("id");
+            f.setAccessible(true);
+            f.set(org, id);
+        } catch (Exception ex) {
+        }
 
         return org;
+    }
+    
+    private WebTarget createTarget() {
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target(contextPath.toExternalForm())
+                .path(ApplicationConfig.class.getAnnotation(ApplicationPath.class).value())
+                .path(PersonResource.class.getAnnotation(Path.class).value());
+        
+        return target;
+    }
+    
+    private Person postAndGet(final String surname, final String givenName) {
+        Response result = createTarget()
+                .request()
+                .post(Entity.json(new Person(surname, givenName)));
+
+        assertEquals(Response.Status.CREATED.getStatusCode(), result.getStatus());
+
+        String id = result.getHeaderString("Location").split(PersonResource.class.getAnnotation(Path.class).value() + "/")[1];
+        result = createTarget()
+                .path(id)
+                .request()
+                .get();
+
+        assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
+
+        return result.readEntity(Person.class);
     }
 }

@@ -18,18 +18,14 @@ package com.github.nderwin.lee7.contact.boundary;
 import com.github.nderwin.lee7.contact.entity.Organization;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityNotFoundException;
 import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceException;
 import javax.persistence.TypedQuery;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -40,6 +36,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -51,83 +48,68 @@ import javax.ws.rs.core.Response;
 @Stateless
 @LocalBean
 @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-@Path("organizations")
+@Path("/organizations")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class OrganizationResource {
     
-    private static final Logger LOG = Logger.getLogger(OrganizationResource.class.getName());
-
     @PersistenceContext
     EntityManager em;
 
     @GET
     @Path("/")
-    public PagingListWrapper<Organization> getAll(
+    public Response getAll(
             @DefaultValue("0") @QueryParam("limit") final int limit, 
             @DefaultValue("0") @QueryParam("offset") final int offset) {
         
-        try {
-            TypedQuery<Organization> q = em.createQuery("SELECT o FROM Organization o", Organization.class)
-                    .setFirstResult(offset)
-                    .setMaxResults(limit);
-            return new PagingListWrapper<>(limit, offset, q.getResultList());
-        } catch (IllegalArgumentException ex) {
-            LOG.log(Level.WARNING, ex.getMessage(), ex);
-            return new PagingListWrapper<>(Collections.EMPTY_LIST);
-        }
+        TypedQuery<Organization> q = em.createQuery("SELECT o FROM Organization o", Organization.class)
+                .setFirstResult(offset)
+                .setMaxResults(limit);
+        return Response.ok(new PagingListWrapper<>(limit, offset, q.getResultList())).build();
     }
     
     @GET
     @Path("/{id}")
     public Response get(@PathParam("id") final Long id) {
         Organization c = em.find(Organization.class, id);
+        
+        if (null == c) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        
         return Response.ok(c).build();
     }
     
     @POST
     @Path("/")
-    public Response save(final Organization organization) throws URISyntaxException {
-        try {
-            em.persist(organization);
-            return Response.created(new URI(getClass().getAnnotation(Path.class).value() + "/" + organization.getId().toString())).build();
-        } catch (PersistenceException ex) {
-            LOG.log(Level.WARNING, ex.getMessage(), ex);
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
+    public Response save(@Context HttpServletRequest request, final Organization organization) throws URISyntaxException {
+        em.persist(organization);
+        return Response.created(URI.create(request.getRequestURI() + "/" + organization.getId().toString())).build();
     }
 
     @PUT
     @Path("/{id}")
-    public Response update(final Organization organization) {
-        try {
-            Organization org = em.find(Organization.class, organization.getId());
-            if (null == org) {
-                throw new EntityNotFoundException("No Organization found for id " + organization.getId());
-            }
-            
-            em.merge(organization);
-            return Response.noContent().build();
-        } catch (IllegalArgumentException | PersistenceException ex) {
-            LOG.log(Level.WARNING, ex.getMessage(), ex);
+    public Response update(@PathParam("id") final Long id, final Organization organization) {
+        Organization org = em.find(Organization.class, id);
+        
+        if ((null == org) || (!org.getId().equals(organization.getId()))) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
+        
+        em.merge(organization);
+        return Response.noContent().build();
     }
     
     @DELETE
     @Path("/{id}")
-    public Response delete(final Organization organization) {
-        try {
-            Organization org = em.find(Organization.class, organization.getId());
-            if (null == org) {
-                throw new EntityNotFoundException("No Organization found for id " + organization.getId());
-            }
-            
-            em.remove(org);
-            return Response.ok().build();
-        } catch (PersistenceException ex) {
-            LOG.log(Level.WARNING, ex.getMessage(), ex);
+    public Response delete(@PathParam("id") final Long id) {
+        Organization org = em.find(Organization.class, id);
+        
+        if (null == org) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
+
+        em.remove(org);
+        return Response.ok().build();
     }
 }

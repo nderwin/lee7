@@ -15,23 +15,27 @@
  */
 package com.github.nderwin.lee7.contact.boundary;
 
+import com.github.nderwin.lee7.contact.ApplicationConfig;
 import com.github.nderwin.lee7.contact.entity.Person;
 import java.lang.reflect.Field;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.UserTransaction;
+import java.net.URL;
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.Path;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit.InSequence;
+import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -42,159 +46,209 @@ import static org.junit.Assert.*;
  * @author nderwin
  */
 @RunWith(Arquillian.class)
+@RunAsClient
 public class PersonResourceIT {
+    
+    static String crudId;
+    
+    static Person crudPerson;
+    
+    @ArquillianResource 
+    private URL contextPath;
 
-    @Inject
-    private PersonResource testMe;
-
-    @Inject
-    private UserTransaction utx;
-
-    @PersistenceContext
-    EntityManager em;
-
-    private Person seedPerson;
-
+    private WebTarget target;
+    
     public PersonResourceIT() {
     }
 
     @Deployment
     public static Archive<?> createDeployment() {
         WebArchive wa = ShrinkWrap.create(WebArchive.class, "test.war");
-        wa.addClass(PersonResource.class);
-        wa.addClass(PagingListWrapper.class);
+        wa.addClass(ApplicationConfig.class);
+        wa.addPackage(PersonResource.class.getPackage());
         wa.addPackage(Person.class.getPackage());
         wa.addAsResource("persistence.xml", "META-INF/persistence.xml");
         wa.addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
 
         return wa;
     }
-
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
+    
     @Before
-    public void setUp() throws Exception {
-        utx.begin();
-        em.joinTransaction();
-
-        seedPerson = new Person("Person", "Seed");
-        em.persist(seedPerson);
-
-        utx.commit();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        utx.begin();
-        em.joinTransaction();
-
-        seedPerson = em.merge(seedPerson);
-        em.remove(seedPerson);
-
-        utx.commit();
+    public void setUp() {
+        Client client = ClientBuilder.newClient();
+        target = client.target(contextPath.toExternalForm())
+                .path(ApplicationConfig.class.getAnnotation(ApplicationPath.class).value())
+                .path(PersonResource.class.getAnnotation(Path.class).value());
     }
 
     @Test
-    public void testGet() throws Exception {
-        Response result = testMe.get(seedPerson.getId());
-        assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
-        assertNotNull(result.getEntity());
-        assertEquals(seedPerson.getSurname(), ((Person) result.getEntity()).getSurname());
-        assertEquals(seedPerson.getGivenName(), ((Person) result.getEntity()).getGivenName());
-    }
-
-    @Test
+    @InSequence(0)
     public void testPost() throws Exception {
-        Response result = testMe.save(new Person("Person", "Test"));
+        Response result = target.request().post(Entity.json(new Person("Person", "Test")));
+
         assertEquals(Response.Status.CREATED.getStatusCode(), result.getStatus());
         assertTrue(result.getHeaders().containsKey("Location"));
-        assertTrue(result.getHeaderString("Location").matches("^.*people/[0-9]*$"));
+        assertTrue(result.getHeaderString("Location").matches("^.*" + PersonResource.class.getAnnotation(Path.class).value() + "/[0-9]*$"));
+        
+        crudId = result.getHeaderString("Location").split(PersonResource.class.getAnnotation(Path.class).value() + "/")[1];
+    }
+    
+    @Test
+    @InSequence(1)
+    public void testGet() throws Exception {
+        target = target.path(crudId);
+
+        Response result = target.request().get();
+        
+        if (result.hasEntity()) {
+            crudPerson = result.readEntity(Person.class);
+        }
+
+        assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
+        assertNotNull(crudPerson);
+    }
+    
+    @Test
+    @InSequence(2)
+    public void testPut() throws Exception {
+        target = target.path(crudId);
+
+        crudPerson.setGivenName("Updated");
+
+        Response result = target.request().put(Entity.json(crudPerson));
+        
+        assertEquals(Response.Status.NO_CONTENT.getStatusCode(), result.getStatus());
+    }
+    
+    @Test
+    @InSequence(3)
+    public void testGetAfterPut() throws Exception {
+        target = target.path(crudId);
+        
+        Response result = target.request().get();
+        
+        if (result.hasEntity()) {
+            crudPerson = result.readEntity(Person.class);
+        }
+        
+        assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
+        assertNotNull(crudPerson);
+        
+        assertEquals("Updated", crudPerson.getGivenName());
+    }
+
+    @Test
+    @InSequence(4)
+    public void testPutDifferentEntityId() throws Exception {
+        target = target.path(crudId);
+        
+        Response result = target.request().put(Entity.json(createWithId(crudPerson.getId() + 1L, "Person", "Oops")));
+        
+        assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
+    }
+
+    @Test
+    @InSequence(5)
+    public void testPutDifferentPathId() throws Exception {
+        target = target.path("" + (crudPerson.getId() + 1L));
+        
+        Response result = target.request().put(Entity.json(createWithId(crudPerson.getId(), "Person", "Oops")));
+        
+        assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
+    }
+
+    @Test
+    @InSequence(6)
+    public void testGetAll() throws Exception {
+        target = target.queryParam("limit", 50).queryParam("offset", 0);
+
+        Response resp = target.request().get();
+
+        PagingListWrapper<Person> result = resp.readEntity(PagingListWrapper.class);
+        
+        assertEquals(Response.Status.OK.getStatusCode(), resp.getStatus());
+        assertNotNull(result);
+        assertNotNull(result.getData());
+        assertEquals(1, result.getData().size());
+        assertFalse(result.getData().isEmpty());
+    }
+    
+    @Test
+    @InSequence(7)
+    public void testDelete() throws Exception {
+        target = target.path(crudId);
+        
+        Response result = target.request().delete();
+
+        assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
+    }
+    
+    @Test
+    @InSequence(8)
+    public void testGetAfterDelete() throws Exception {
+        target = target.path(crudId);
+        
+        Response result = target.request().get();
+        
+        assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
+        
+        crudId = null;
+        crudPerson = null;
     }
 
     @Test
     public void testPostWithId() throws Exception {
         Person org = createWithId(Long.MAX_VALUE, "Person", "Test");
 
-        Response result = testMe.save(org);
-        assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
+        Response resp = target.request().post(Entity.json(org));
+
+        assertEquals(Response.Status.NOT_FOUND.getStatusCode(), resp.getStatus());
     }
     
     @Test
-    public void testPut() throws Exception {
-        Person org = new Person("Person", "Test");
-        Response result = testMe.save(org);
-
-        Long id = Long.parseLong(result.getHeaderString("Location").split("people/")[1]);
-        org = (Person) testMe.get(id).getEntity();
-        org.setGivenName("Updated");
-
-        result = testMe.update(org);
-        assertEquals(Response.Status.NO_CONTENT.getStatusCode(), result.getStatus());
-
-        org = (Person) testMe.get(id).getEntity();
-        assertEquals("Updated", org.getGivenName());
-    }
-
-    @Test
     public void testPutNotExisting() throws Exception {
-        Person org = createWithId(Long.MIN_VALUE, "Person", "Test");
+        Person person = createWithId(Long.MIN_VALUE, "Person", "Test");
 
-        Response result = testMe.update(org);
+        target = target.path(person.getId().toString());
+        Response result = target.request().put(Entity.json(person));
+        
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
     }
     
     @Test
     public void testPutNewInstance() {
-        Response result = testMe.update(new Person("Person", "Foo"));
+        target = target.path("" + Long.MAX_VALUE);
+
+        Response result = target.request().put(Entity.json(new Person("Person", "Foo")));
+        
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
-    }
-    
-    @Test
-    public void testDelete() throws Exception {
-        Person org = new Person("Person", "Delete");
-        Response result = testMe.save(org);
-
-        Long id = Long.parseLong(result.getHeaderString("Location").split("people/")[1]);
-        org = (Person) testMe.get(id).getEntity();
-
-        result = testMe.delete(org);
-        assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
     }
     
     @Test
     public void testDeleteNonExisting() throws Exception {
-        Person org = createWithId(Long.MIN_VALUE, "Person", "Delete");
+        target = target.path("" + Long.MIN_VALUE);
 
-        Response result = testMe.delete(org);
+        Response result = target.request().delete();
+
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
     }
     
     @Test
-    public void testGetAll() throws Exception {
-        PagingListWrapper<Person> result = testMe.getAll(50, 0);
-        assertNotNull(result);
-        assertNotNull(result.getData());
-        assertFalse(result.getData().isEmpty());
-    }
-    
-    @Test
     public void testGetAllBadLimit() {
-        PagingListWrapper<Person> result = testMe.getAll(-50, 0);
-        assertTrue(result.getData().isEmpty());
-        assertEquals(0, result.getLimit());
+        target = target.queryParam("limit", -50).queryParam("offset", 0);
+
+        Response resp = target.request().get();
+
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), resp.getStatus());
     }
     
     @Test
     public void testGetAllBadOffset() {
-        PagingListWrapper<Person> result = testMe.getAll(50, -1);
-        assertTrue(result.getData().isEmpty());
-        assertEquals(0, result.getOffset());
+        target = target.queryParam("limit", 50).queryParam("offset", -1);
+
+        Response resp = target.request().get();
+        
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), resp.getStatus());
     }
     
     private Person createWithId(final Long id, final String surname, final String givenName) throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {

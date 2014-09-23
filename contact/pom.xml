@@ -102,7 +102,19 @@
             <version>0.7.1.201405082137</version>
             <scope>test</scope>
         </dependency>
-                    
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-client</artifactId>
+            <version>3.0.6.Final</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jackson-provider</artifactId>
+            <version>3.0.6.Final</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Hibernate Validator -->
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -351,8 +363,6 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <version>2.17</version>
                         <configuration>
-                            <parallel>methods</parallel>
-                            <threadCount>10</threadCount>
                             <systemPropertyVariables>
                                 <project.artifactId>${project.artifactId}</project.artifactId>
                                 <arquillian.launch>wildfly</arquillian.launch>

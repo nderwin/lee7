@@ -16,7 +16,7 @@
 package com.github.nderwin.lee7.contact.boundary;
 
 import com.github.nderwin.lee7.contact.ApplicationConfig;
-import com.github.nderwin.lee7.contact.entity.Organization;
+import com.github.nderwin.lee7.contact.entity.Person;
 import java.lang.reflect.Field;
 import java.net.URL;
 import javax.ws.rs.ApplicationPath;
@@ -45,126 +45,126 @@ import static org.junit.Assert.*;
  */
 @RunWith(Arquillian.class)
 @RunAsClient
-public class OrganizationResourceIT {
-
-    @ArquillianResource
-    private URL contextPath;
+public class PersonResourceIT {
     
-    public OrganizationResourceIT() {
+    @ArquillianResource 
+    private URL contextPath;
+
+    public PersonResourceIT() {
     }
 
     @Deployment
     public static Archive<?> createDeployment() {
         WebArchive wa = ShrinkWrap.create(WebArchive.class, "test.war");
         wa.addClass(ApplicationConfig.class);
-        wa.addPackage(OrganizationResource.class.getPackage());
-        wa.addPackage(Organization.class.getPackage());
+        wa.addPackage(PersonResource.class.getPackage());
+        wa.addPackage(Person.class.getPackage());
         wa.addAsResource("persistence.xml", "META-INF/persistence.xml");
         wa.addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
 
         return wa;
     }
-
+    
     @Test
     public void testPost() {
         Response result = createTarget()
                 .request()
-                .post(Entity.json(new Organization("Test Org")));
+                .post(Entity.json(new Person("Person", "Test")));
 
         assertEquals(Response.Status.CREATED.getStatusCode(), result.getStatus());
         assertTrue(result.getHeaders().containsKey("Location"));
-        assertTrue(result.getHeaderString("Location").matches("^.*" + OrganizationResource.class.getAnnotation(Path.class).value() + "/[0-9]*$"));
+        assertTrue(result.getHeaderString("Location").matches("^.*" + PersonResource.class.getAnnotation(Path.class).value() + "/[0-9]*$"));
     }
     
     @Test
     public void testGet() {
-        Organization org = postAndGet("Test Org");
-        
-        assertNotNull(org);
-    }
+        Person p = postAndGet("Person", "Test");
 
+        assertNotNull(p);
+    }
+    
     @Test
     public void testPut() {
-        Organization org = postAndGet("Test Org");
+        Person p = postAndGet("Person", "Test");
 
         // update it
-        org.setName("Updated Org");
+        p.setGivenName("Updated");
 
         Response result = createTarget()
-                .path(org.getId().toString())
+                .path(p.getId().toString())
                 .request()
-                .put(Entity.json(org));
+                .put(Entity.json(p));
         
         assertEquals(Response.Status.NO_CONTENT.getStatusCode(), result.getStatus());
 
         // make sure it was updated
         result = createTarget()
-                .path(org.getId().toString())
+                .path(p.getId().toString())
                 .request()
                 .get();
 
         assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
-        org = result.readEntity(Organization.class);
-        assertNotNull(org);
-        assertEquals("Updated Org", org.getName());
+        p = result.readEntity(Person.class);
+        assertNotNull(p);
+        assertEquals("Updated", p.getGivenName());
     }
-
+    
     @Test
     public void testPutDifferentEntityId() {
-        Organization org = postAndGet("Test Org");
-        
+        Person p = postAndGet("Person", "Test");
+
         Response result = createTarget()
-                .path(org.getId().toString())
+                .path(p.getId().toString())
                 .request()
-                .put(Entity.json(createWithId(org.getId() + 1L, "Oops")));
+                .put(Entity.json(createWithId(p.getId() + 1L, "Person", "Oops")));
         
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
     }
 
     @Test
     public void testPutDifferentPathId() {
-        Organization org = postAndGet("Test Org");
-        
+        Person p = postAndGet("Person", "Test");
+
         Response result = createTarget()
-                .path("" + (org.getId() + 1L))
+                .path("" + (p.getId() + 1L))
                 .request()
-                .put(Entity.json(createWithId(org.getId(), "Oops")));
+                .put(Entity.json(createWithId(p.getId(), "Person", "Oops")));
         
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
     }
 
     @Test
     public void testGetAll() {
-        postAndGet("Test Org");
-
+        postAndGet("Person", "Test");
+        
         Response resp = createTarget()
                 .queryParam("limit", 50)
                 .queryParam("offset", 0)
                 .request()
                 .get();
 
-        PagingListWrapper<Organization> result = resp.readEntity(PagingListWrapper.class);
-
+        PagingListWrapper<Person> result = resp.readEntity(PagingListWrapper.class);
+        
         assertEquals(Response.Status.OK.getStatusCode(), resp.getStatus());
         assertNotNull(result);
         assertNotNull(result.getData());
         assertNotEquals(0, result.getData().size());
         assertFalse(result.getData().isEmpty());
     }
-
+    
     @Test
     public void testDelete() {
-        Organization org = postAndGet("Test Org");
-
+        Person p = postAndGet("Person", "Test");
+        
         Response result = createTarget()
-                .path(org.getId().toString())
+                .path(p.getId().toString())
                 .request()
                 .delete();
 
         assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
         
         result = createTarget()
-                .path(org.getId().toString())
+                .path(p.getId().toString())
                 .request()
                 .get();
 
@@ -173,47 +173,47 @@ public class OrganizationResourceIT {
 
     @Test
     public void testPostWithId() {
-        Organization org = createWithId(Long.MAX_VALUE, "Test Org");
-        
+        Person org = createWithId(Long.MAX_VALUE, "Person", "Test");
+
         Response resp = createTarget()
                 .request()
                 .post(Entity.json(org));
 
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), resp.getStatus());
     }
-
+    
     @Test
     public void testPutNotExisting() {
-        Organization org = createWithId(Long.MIN_VALUE, "Test Org");
+        Person person = createWithId(Long.MIN_VALUE, "Person", "Test");
 
         Response result = createTarget()
-                .path(org.getId().toString())
+                .path(person.getId().toString())
                 .request()
-                .put(Entity.json(org));
+                .put(Entity.json(person));
         
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
     }
-
+    
     @Test
     public void testPutNewInstance() {
         Response result = createTarget()
                 .path("" + Long.MAX_VALUE)
                 .request()
-                .put(Entity.json(new Organization("Foo")));
+                .put(Entity.json(new Person("Person", "Foo")));
         
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
     }
-
+    
     @Test
     public void testDeleteNonExisting() {
         Response result = createTarget()
                 .path("" + Long.MIN_VALUE)
                 .request()
                 .delete();
-        
+
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
     }
-
+    
     @Test
     public void testGetAllBadLimit() {
         Response resp = createTarget()
@@ -224,7 +224,7 @@ public class OrganizationResourceIT {
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), resp.getStatus());
     }
-
+    
     @Test
     public void testGetAllBadOffset() {
         Response resp = createTarget()
@@ -232,12 +232,12 @@ public class OrganizationResourceIT {
                 .queryParam("offset", -1)
                 .request()
                 .get();
-
+        
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), resp.getStatus());
     }
-
-    private Organization createWithId(final Long id, final String name) {
-        Organization org = new Organization(name);
+    
+    private Person createWithId(final Long id, final String surname, final String givenName) {
+        Person org = new Person(surname, givenName);
 
         try {
             // force an id into the object we want persisted
@@ -254,19 +254,19 @@ public class OrganizationResourceIT {
         Client client = ClientBuilder.newClient();
         WebTarget target = client.target(contextPath.toExternalForm())
                 .path(ApplicationConfig.class.getAnnotation(ApplicationPath.class).value())
-                .path(OrganizationResource.class.getAnnotation(Path.class).value());
+                .path(PersonResource.class.getAnnotation(Path.class).value());
         
         return target;
     }
     
-    private Organization postAndGet(final String name) {
+    private Person postAndGet(final String surname, final String givenName) {
         Response result = createTarget()
                 .request()
-                .post(Entity.json(new Organization(name)));
+                .post(Entity.json(new Person(surname, givenName)));
 
         assertEquals(Response.Status.CREATED.getStatusCode(), result.getStatus());
 
-        String id = result.getHeaderString("Location").split(OrganizationResource.class.getAnnotation(Path.class).value() + "/")[1];
+        String id = result.getHeaderString("Location").split(PersonResource.class.getAnnotation(Path.class).value() + "/")[1];
         result = createTarget()
                 .path(id)
                 .request()
@@ -274,6 +274,6 @@ public class OrganizationResourceIT {
 
         assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
 
-        return result.readEntity(Organization.class);
+        return result.readEntity(Person.class);
     }
 }

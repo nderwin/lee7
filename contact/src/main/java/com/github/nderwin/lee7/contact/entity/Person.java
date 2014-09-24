@@ -25,6 +25,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -32,22 +33,24 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  * @author nderwin
  */
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.FIELD)
 @Entity(name = "Person")
 @Table(schema = "contact", name = "person")
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Person extends LegalEntity implements Serializable {
     
     private static final long serialVersionUID = -3735364287245307501L;
     
     @Basic
     @Column(name = "surname", length = 50)
+    @XmlElement
     private String surname;
 
     @Basic(optional = false)
     @Column(name = "givenname", nullable = false, length = 50)
     @NotNull
     @Size(min = 1, max = 50)
+    @XmlElement(nillable = false, required = true)
     private String givenName;
     
     protected Person() {

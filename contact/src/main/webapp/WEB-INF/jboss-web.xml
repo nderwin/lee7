@@ -16,5 +16,5 @@ limitations under the License.
 -->
 
 <jboss-web>  
-    <context-root>/contact</context-root>  
+    <context-root>/</context-root>  
 </jboss-web>

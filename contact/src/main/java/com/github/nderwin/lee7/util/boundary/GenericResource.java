@@ -15,7 +15,6 @@
  */
 package com.github.nderwin.lee7.util.boundary;
 
-import com.github.nderwin.lee7.contact.entity.Person;
 import java.net.URI;
 import java.net.URISyntaxException;
 import javax.persistence.Entity;
@@ -70,7 +69,7 @@ public class GenericResource<R extends Resource> {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
-        return Response.ok(new GenericEntity<>(rez, Person.class)).build();
+        return Response.ok(new GenericEntity(rez, resource.getClass().getGenericSuperclass())).build();
     }
 
     @POST

@@ -15,7 +15,7 @@
  */
 package com.github.nderwin.lee7.contact.entity;
 
-import java.io.Serializable;
+import com.github.nderwin.lee7.util.boundary.Resource;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -36,7 +36,7 @@ import javax.xml.bind.annotation.XmlID;
 @Entity(name = "LegalEntity")
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @XmlAccessorType(XmlAccessType.FIELD)
-public abstract class LegalEntity implements Serializable {
+public abstract class LegalEntity implements Resource {
 
     private static final long serialVersionUID = -1822203393624550172L;
 
@@ -47,6 +47,7 @@ public abstract class LegalEntity implements Serializable {
     @XmlID
     private Long id;
 
+    @Override
     public Long getId() {
         return id;
     }

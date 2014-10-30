@@ -15,6 +15,7 @@
  */
 package com.github.nderwin.lee7.contact.boundary;
 
+import com.github.nderwin.lee7.util.boundary.PagingListWrapper;
 import com.github.nderwin.lee7.contact.ApplicationConfig;
 import com.github.nderwin.lee7.contact.entity.Person;
 import java.lang.reflect.Field;
@@ -59,6 +60,7 @@ public class PersonResourceIT {
         wa.addClass(ApplicationConfig.class);
         wa.addPackage(PersonResource.class.getPackage());
         wa.addPackage(Person.class.getPackage());
+        wa.addPackage(PagingListWrapper.class.getPackage());
         wa.addAsResource("persistence.xml", "META-INF/persistence.xml");
         wa.addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.nderwin.lee7.contact.boundary;
+package com.github.nderwin.lee7.util.boundary;
 
 import java.util.Collections;
 import java.util.List;

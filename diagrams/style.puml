@@ -1,0 +1,26 @@
+@startuml
+skinparam defaultFontName "DejaVu Sans"
+
+skinparam class {
+    ArrowColor Black
+    BorderColor Black
+}
+
+skinparam class<<Entity>> {
+    BackgroundColor #b1e7b5
+}
+
+skinparam class<<Boundary>> {
+    BackgroundColor #fabebe
+}
+
+skinparam class<<Description>> {
+    BackgroundColor #b5c7d1
+}
+
+skinparam class<<Role>> {
+    BackgroundColor #f9f1b2
+}
+
+hide circle
+@enduml

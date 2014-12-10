@@ -1,0 +1,23 @@
+@startuml
+
+!include ./git/lee7/diagrams/style.puml
+!include ./git/lee7/diagrams/Account.puml
+
+!undef SHOW_FIELDS
+
+hide stereotype
+
+package "finance" {
+    package "boundary" {
+        class AccountResource <<Boundary>>
+        class TransactionResource <<Boundary>>
+    }
+    package "entity" {
+        class Transaction <<Entity>> {
+        }
+
+        Account o-- Transaction
+    }
+}
+
+@enduml

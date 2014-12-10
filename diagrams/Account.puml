@@ -1,0 +1,13 @@
+@startuml
+!define SHOW_FIELDS
+
+package "finance" {
+    package "entity" {
+        class Account <<Entity>> {
+            !ifdef SHOW_FIELDS
+            -accountNumber : String
+            !endif
+        }
+    }
+}
+@enduml

@@ -20,6 +20,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJBException;
 import javax.persistence.PersistenceException;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
@@ -51,6 +52,9 @@ public class ResourceExceptionMapper implements ExceptionMapper<Exception> {
             resp = Response.status(Response.Status.NOT_FOUND).build();
         } else if (ex instanceof URISyntaxException) {
             level = Level.WARNING;
+        } else if (ex instanceof NotFoundException) {
+            level = Level.INFO;
+            resp = Response.status(Response.Status.NOT_FOUND).build();
         }
 
         if (Response.Status.INTERNAL_SERVER_ERROR.getStatusCode() == resp.getStatus()) {

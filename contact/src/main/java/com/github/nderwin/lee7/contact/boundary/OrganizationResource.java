@@ -15,13 +15,16 @@
  */
 package com.github.nderwin.lee7.contact.boundary;
 
+import com.github.nderwin.lee7.LogAspect;
 import com.github.nderwin.lee7.contact.entity.Organization;
 import java.net.URI;
 import java.net.URISyntaxException;
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.interceptor.Interceptors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
@@ -48,9 +51,11 @@ import javax.ws.rs.core.Response;
 @Stateless
 @LocalBean
 @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-@Path("/organizations")
+@Path("resources/organizations")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Interceptors(LogAspect.class)
+@RolesAllowed({"authenticated-user"})
 public class OrganizationResource {
     
     @PersistenceContext
@@ -82,7 +87,7 @@ public class OrganizationResource {
     
     @POST
     @Path("/")
-    public Response save(@Context HttpServletRequest request, final Organization organization) throws URISyntaxException {
+    public Response save(@Context final HttpServletRequest request, final Organization organization) throws URISyntaxException {
         em.persist(organization);
         return Response.created(URI.create(request.getRequestURI() + "/" + organization.getId().toString())).build();
     }

@@ -6,7 +6,36 @@
             30
         </session-timeout>
     </session-config>
-    <welcome-file-list>
-        <welcome-file>index.html</welcome-file>
-    </welcome-file-list>
+    <security-constraint>
+        <display-name>Authentication</display-name>
+        <web-resource-collection>
+            <web-resource-name>Login</web-resource-name>
+            <description/>
+            <url-pattern>/contact/login/*</url-pattern>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Logout</web-resource-name>
+            <description/>
+            <url-pattern>/contact/logout/*</url-pattern>
+        </web-resource-collection>
+    </security-constraint>
+    <security-constraint>
+        <display-name>REST Resources</display-name>
+        <web-resource-collection>
+            <web-resource-name>REST Resources</web-resource-name>
+            <description/>
+            <url-pattern>/contact/resources/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <description/>
+            <role-name>authenticated-user</role-name>
+        </auth-constraint>
+    </security-constraint>
+    <login-config>
+        <auth-method>BASIC</auth-method>
+        <realm-name>JASPIC</realm-name>
+    </login-config>
+    <security-role>
+        <role-name>authenticated-user</role-name>
+    </security-role>
 </web-app>

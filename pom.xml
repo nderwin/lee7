@@ -42,7 +42,7 @@
             <dependency>
                 <groupId>org.jboss.arquillian</groupId>
                 <artifactId>arquillian-bom</artifactId>
-                <version>1.1.5.Final</version>
+                <version>1.1.8.Final</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -53,7 +53,7 @@
         <dependency>
             <groupId>org.jboss.spec</groupId>
             <artifactId>jboss-javaee-7.0</artifactId>
-            <version>1.0.1.Final</version>
+            <version>1.0.3.Final</version>
             <type>pom</type>
             <scope>provided</scope>
         </dependency>
@@ -61,7 +61,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.11</version>
+            <version>4.12</version>
             <scope>test</scope>
         </dependency>
         
@@ -69,7 +69,7 @@
         <dependency>
             <groupId>org.wildfly</groupId>
             <artifactId>wildfly-arquillian-container-managed</artifactId>
-            <version>8.0.0.Final</version>
+            <version>8.2.1.Final</version>
             <scope>test</scope>
         </dependency>
         
@@ -77,35 +77,37 @@
         <dependency>
             <groupId>org.jboss.arquillian.junit</groupId>
             <artifactId>arquillian-junit-container</artifactId>
+            <version>1.1.8.Final</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jboss.arquillian.container</groupId>
             <artifactId>arquillian-container-test-api</artifactId>
+            <version>1.1.8.Final</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jboss.arquillian.extension</groupId>
             <artifactId>arquillian-jacoco</artifactId>
-            <version>1.0.0.Alpha6</version>
+            <version>1.0.0.Alpha8</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jacoco</groupId>
             <artifactId>org.jacoco.core</artifactId>
-            <version>0.7.1.201405082137</version>
+            <version>0.7.5.201505241946</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-client</artifactId>
-            <version>3.0.6.Final</version>
+            <version>3.0.12.Final</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-jackson-provider</artifactId>
-            <version>3.0.6.Final</version>
+            <version>3.0.12.Final</version>
             <scope>test</scope>
         </dependency>
 
@@ -113,7 +115,7 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
-            <version>5.1.2.Final</version>
+            <version>5.2.1.Final</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

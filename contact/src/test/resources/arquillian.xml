@@ -9,7 +9,7 @@
     
     <container qualifier="wildfly" default="true">
         <configuration>
-            <property name="jbossHome">${user.home}/.m2/arquillian/${project.artifactId}/wildfly-8.0.0.Final</property>
+            <property name="jbossHome">${user.home}/.m2/arquillian/${project.artifactId}/wildfly-9.0.1.Final</property>
             <property name="serverConfig">standalone-full-test.xml</property>
             <property name="outputToConsole">true</property>
         </configuration>

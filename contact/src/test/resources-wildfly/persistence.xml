@@ -6,8 +6,11 @@
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <shared-cache-mode>ALL</shared-cache-mode>
     <properties>
-      <property name="hibernate.show_sql" value="true"/>
-      <property name="hibernate.format_sql" value="true"/>
+            <property name="hibernate.show_sql" value="false"/>
+            <property name="hibernate.format_sql" value="false"/>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
+            <property name="jboss.entity.manager.factory.jndi.name" value="java:comp/env/jpa/emf" />    
+            <property name="jboss.entity.manager.jndi.name" value="java:comp/env/jpa/em"/>        
     </properties>
   </persistence-unit>
 </persistence>

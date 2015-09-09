@@ -1,11 +1,8 @@
 package com.github.nderwin.lee7.authentication;
 
 import com.github.nderwin.lee7.LogAspect;
-import com.github.nderwin.lee7.authentication.entity.AuthenticationToken;
-import com.github.nderwin.lee7.authentication.entity.User;
+import com.github.nderwin.lee7.authentication.boundary.AuthenticationHelper;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -13,10 +10,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.interceptor.Interceptors;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -44,7 +37,7 @@ public class HttpServerAuthModule implements ServerAuthModule {
 
     private CallbackHandler handler;
 
-    EntityManager em;
+    private AuthenticationHelper authHelper;
 
     private final Class<?>[] supportedMessageTypes = new Class[]{
         HttpServletRequest.class,
@@ -53,7 +46,7 @@ public class HttpServerAuthModule implements ServerAuthModule {
 
     public HttpServerAuthModule() {
         try {
-            em = ((EntityManagerFactory) new InitialContext().lookup("java:comp/env/jpa/emf")).createEntityManager();
+            authHelper = (AuthenticationHelper) new InitialContext().lookup("java:module/AuthenticationHelper");
         } catch (NamingException ex) {
             LOG.log(Level.SEVERE, ex.getMessage(), ex);
         }
@@ -101,33 +94,19 @@ public class HttpServerAuthModule implements ServerAuthModule {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return SEND_FAILURE;
             }
+            
+            UserInformation user = authHelper.validateToken(token);
+            if (null != user) {
+                callbacks = new Callback[]{
+                    new CallerPrincipalCallback(clientSubject, user.getUsername()),
+                    new PasswordValidationCallback(clientSubject, user.getUsername(), user.getPassword().toCharArray()),
+                    new GroupPrincipalCallback(clientSubject, user.getRoles())
+                };
 
-            AuthenticationToken auth = em.find(AuthenticationToken.class, token);
-            if (null != auth) {
                 try {
-                    User user = em.createNamedQuery("findByUsername", User.class)
-                            .setParameter("username", auth.getUsername())
-                            .getSingleResult();
-                    
-                    // TODO - maybe use a query instead?
-                    List<String> roles = new ArrayList<>(user.getRoles().size());
-                    user.getRoles().stream().forEach((r) -> {
-                        roles.add(r.getName());
-                    });
-                    
-                    callbacks = new Callback[]{
-                        new CallerPrincipalCallback(clientSubject, user.getUsername()),
-                        new PasswordValidationCallback(clientSubject, user.getUsername(), user.getPassword().toCharArray()),
-                        new GroupPrincipalCallback(clientSubject, roles.toArray(new String[]{}))
-                    };
-
-                    try {
-                        handler.handle(callbacks);
-                    } catch (IOException | UnsupportedCallbackException e) {
-                        throw (AuthException) new AuthException(e.getMessage()).initCause(e);
-                    }
-                } catch (NoResultException | NonUniqueResultException ex) {
-                    throw (AuthException) new AuthException(ex.getMessage()).initCause(ex);
+                    handler.handle(callbacks);
+                } catch (IOException | UnsupportedCallbackException e) {
+                    throw (AuthException) new AuthException(e.getMessage()).initCause(e);
                 }
             } else {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

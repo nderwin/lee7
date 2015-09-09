@@ -78,7 +78,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${user.home}/.m2/arquillian/${project.artifactId}/wildfly-8.0.0.Final/standalone/configuration</outputDirectory>
+                            <outputDirectory>${user.home}/.m2/arquillian/${project.artifactId}/wildfly-9.0.1.Final/standalone/configuration</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>src/test/resources-wildfly</directory>
@@ -92,7 +92,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.5.201505241946</version>
+                <version>${jacoco.version}}</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -181,7 +181,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.5.201505241946</version>
+                <version>${jacoco.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -247,7 +247,7 @@
                     <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>0.7.5.201505241946</version>
+                        <version>${jacoco.version}</version>
                         <executions>
                             <execution>
                                 <id>prepare-agent-integration</id>

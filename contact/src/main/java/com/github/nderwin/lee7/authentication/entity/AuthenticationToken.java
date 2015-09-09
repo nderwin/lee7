@@ -17,6 +17,7 @@ package com.github.nderwin.lee7.authentication.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -33,7 +34,7 @@ import javax.persistence.TemporalType;
 @Table(schema = "contact", name = "authentication_token")
 public class AuthenticationToken implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 5917722069130051879L;
 
     @Id
     @Column(name = "token", nullable = false, length = 255)
@@ -56,8 +57,11 @@ public class AuthenticationToken implements Serializable {
     protected AuthenticationToken() {
     }
 
-    public AuthenticationToken(final String token) {
+    public AuthenticationToken(final String token, final String username) {
         this.token = token;
+        this.username = username;
+        this.creationDate = new Date();
+        this.lastUsedDate = new Date(this.creationDate.getTime());
     }
 
     public String getToken() {
@@ -99,20 +103,22 @@ public class AuthenticationToken implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the token fields are not set
-        if (!(object instanceof AuthenticationToken)) {
+        if (object == null) {
             return false;
         }
-        AuthenticationToken other = (AuthenticationToken) object;
-        if ((this.token == null && other.token != null) || (this.token != null && !this.token.equals(other.token))) {
+
+        if (getClass() != object.getClass()) {
             return false;
         }
-        return true;
+
+        final AuthenticationToken other = (AuthenticationToken) object;
+
+        return Objects.equals(this.token, other.token);
     }
 
     @Override
     public String toString() {
-        return "com.github.nderwin.lee7.authentication.entity.AuthenticationToken[ id=" + token + " ]";
+        return "AuthenticationToken{token=" + token + ", username=" + username + "}";
     }
 
 }

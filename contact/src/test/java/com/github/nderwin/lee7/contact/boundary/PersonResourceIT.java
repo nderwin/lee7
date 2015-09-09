@@ -15,6 +15,10 @@
  */
 package com.github.nderwin.lee7.contact.boundary;
 
+import com.github.nderwin.lee7.LogAspect;
+import com.github.nderwin.lee7.authentication.HttpServerAuthModule;
+import com.github.nderwin.lee7.authentication.boundary.AuthenticationResource;
+import com.github.nderwin.lee7.authentication.entity.AuthenticationToken;
 import com.github.nderwin.lee7.contact.ApplicationConfig;
 import com.github.nderwin.lee7.contact.entity.Person;
 import java.lang.reflect.Field;
@@ -32,7 +36,6 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,21 +49,26 @@ import static org.junit.Assert.*;
 @RunWith(Arquillian.class)
 @RunAsClient
 public class PersonResourceIT {
+
+    private static final String TOKEN = "12345";
     
     @ArquillianResource 
     private URL contextPath;
-
-    public PersonResourceIT() {
-    }
-
+    
     @Deployment
     public static Archive<?> createDeployment() {
         WebArchive wa = ShrinkWrap.create(WebArchive.class, "test.war");
         wa.addClass(ApplicationConfig.class);
+        wa.addClass(LogAspect.class);
+        wa.addPackage(HttpServerAuthModule.class.getPackage());
+        wa.addPackage(AuthenticationResource.class.getPackage());
+        wa.addPackage(AuthenticationToken.class.getPackage());
         wa.addPackage(PersonResource.class.getPackage());
         wa.addPackage(Person.class.getPackage());
         wa.addAsResource("persistence.xml", "META-INF/persistence.xml");
-        wa.addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+        wa.addAsWebInfResource("beans.xml");
+        wa.addAsWebInfResource("jboss-web.xml");
+        wa.addAsWebInfResource("web.xml");
 
         return wa;
     }
@@ -69,6 +77,7 @@ public class PersonResourceIT {
     public void testPost() {
         Response result = createTarget()
                 .request()
+                .header("X-Auth-Token", TOKEN)
                 .post(Entity.json(new Person("Person", "Test")));
 
         assertEquals(Response.Status.CREATED.getStatusCode(), result.getStatus());
@@ -93,6 +102,7 @@ public class PersonResourceIT {
         Response result = createTarget()
                 .path(p.getId().toString())
                 .request()
+                .header("X-Auth-Token", TOKEN)
                 .put(Entity.json(p));
         
         assertEquals(Response.Status.NO_CONTENT.getStatusCode(), result.getStatus());
@@ -101,6 +111,7 @@ public class PersonResourceIT {
         result = createTarget()
                 .path(p.getId().toString())
                 .request()
+                .header("X-Auth-Token", TOKEN)
                 .get();
 
         assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
@@ -116,6 +127,7 @@ public class PersonResourceIT {
         Response result = createTarget()
                 .path(p.getId().toString())
                 .request()
+                .header("X-Auth-Token", TOKEN)
                 .put(Entity.json(createWithId(p.getId() + 1L, "Person", "Oops")));
         
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
@@ -128,6 +140,7 @@ public class PersonResourceIT {
         Response result = createTarget()
                 .path("" + (p.getId() + 1L))
                 .request()
+                .header("X-Auth-Token", TOKEN)
                 .put(Entity.json(createWithId(p.getId(), "Person", "Oops")));
         
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
@@ -141,6 +154,7 @@ public class PersonResourceIT {
                 .queryParam("limit", 50)
                 .queryParam("offset", 0)
                 .request()
+                .header("X-Auth-Token", TOKEN)
                 .get();
 
         PagingListWrapper<Person> result = resp.readEntity(PagingListWrapper.class);
@@ -159,6 +173,7 @@ public class PersonResourceIT {
         Response result = createTarget()
                 .path(p.getId().toString())
                 .request()
+                .header("X-Auth-Token", TOKEN)
                 .delete();
 
         assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
@@ -166,6 +181,7 @@ public class PersonResourceIT {
         result = createTarget()
                 .path(p.getId().toString())
                 .request()
+                .header("X-Auth-Token", TOKEN)
                 .get();
 
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
@@ -177,6 +193,7 @@ public class PersonResourceIT {
 
         Response resp = createTarget()
                 .request()
+                .header("X-Auth-Token", TOKEN)
                 .post(Entity.json(org));
 
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), resp.getStatus());
@@ -189,6 +206,7 @@ public class PersonResourceIT {
         Response result = createTarget()
                 .path(person.getId().toString())
                 .request()
+                .header("X-Auth-Token", TOKEN)
                 .put(Entity.json(person));
         
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
@@ -199,6 +217,7 @@ public class PersonResourceIT {
         Response result = createTarget()
                 .path("" + Long.MAX_VALUE)
                 .request()
+                .header("X-Auth-Token", TOKEN)
                 .put(Entity.json(new Person("Person", "Foo")));
         
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
@@ -209,6 +228,7 @@ public class PersonResourceIT {
         Response result = createTarget()
                 .path("" + Long.MIN_VALUE)
                 .request()
+                .header("X-Auth-Token", TOKEN)
                 .delete();
 
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
@@ -220,6 +240,7 @@ public class PersonResourceIT {
                 .queryParam("limit", -50)
                 .queryParam("offset", 0)
                 .request()
+                .header("X-Auth-Token", TOKEN)
                 .get();
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), resp.getStatus());
@@ -231,6 +252,7 @@ public class PersonResourceIT {
                 .queryParam("limit", 50)
                 .queryParam("offset", -1)
                 .request()
+                .header("X-Auth-Token", TOKEN)
                 .get();
         
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), resp.getStatus());
@@ -262,6 +284,7 @@ public class PersonResourceIT {
     private Person postAndGet(final String surname, final String givenName) {
         Response result = createTarget()
                 .request()
+                .header("X-Auth-Token", TOKEN)
                 .post(Entity.json(new Person(surname, givenName)));
 
         assertEquals(Response.Status.CREATED.getStatusCode(), result.getStatus());
@@ -270,6 +293,7 @@ public class PersonResourceIT {
         result = createTarget()
                 .path(id)
                 .request()
+                .header("X-Auth-Token", TOKEN)
                 .get();
 
         assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());

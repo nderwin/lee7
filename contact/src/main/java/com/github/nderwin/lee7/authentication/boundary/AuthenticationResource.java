@@ -16,6 +16,9 @@
 package com.github.nderwin.lee7.authentication.boundary;
 
 import com.github.nderwin.lee7.LogAspect;
+import com.github.nderwin.lee7.authentication.entity.AuthenticationToken;
+import com.github.nderwin.lee7.authentication.entity.User;
+import java.util.UUID;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.LocalBean;
@@ -24,6 +27,8 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.interceptor.Interceptors;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -51,29 +56,51 @@ public class AuthenticationResource {
     
     @PersistenceContext
     EntityManager em;
-
+    
     @POST
     @Path("/login")
     @PermitAll
-    public Response login(@Context final HttpServletRequest request) {
+    public Response login(@Context final HttpServletRequest request, final LoginPayload payload) {
+        Response resp;
         
-        // get username and password from the payload?
+        try {
+            // validate username and password (insensitive search for username)
+            User user = em.createNamedQuery("findByUsername", User.class)
+                    .setParameter("username", payload.getUsername())
+                    .getSingleResult();
+
+            // TODO - need to salt and encrypt the password
+            if (user.getPassword().equals(payload.getPassword())) {
+                // TODO - is UUID good/unique enough for the token?
+                AuthenticationToken token = new AuthenticationToken(UUID.randomUUID().toString(), user.getUsername());
+                em.persist(token);
+
+                resp = Response.ok(token).build();
+            } else {
+                resp = Response.status(Response.Status.UNAUTHORIZED).build();
+            }
+        } catch (NoResultException | NonUniqueResultException ex) {
+            resp = Response.status(Response.Status.UNAUTHORIZED).build();
+        }
         
-        // validate username and password (insensitive search for username)
-        
-        // generate new auth token, and build response with it
-        
-        return Response.serverError().entity("{\"IamNot\": \"finishedYet\"}").build();
+        return resp;
     }
     
     @PUT
     @Path("/logout")
     @RolesAllowed({"authenticated-user"})
     public Response logout(@Context final HttpServletRequest request) throws ServletException {
-        request.logout();
+        String token = request.getHeader("X-Auth-Token");
+        if (null != token) {
+            AuthenticationToken t = em.find(AuthenticationToken.class, token);
+            if (null != t) {
+                em.remove(t);
+            }
+        }
         
-        // clear the auth token
+        request.logout();
         
         return Response.ok().build();
     }
+
 }

@@ -76,13 +76,13 @@ public class OrganizationResource {
     @GET
     @Path("/{id}")
     public Response get(@PathParam("id") final Long id) {
-        Organization c = em.find(Organization.class, id);
+        Organization org = em.find(Organization.class, id);
         
-        if (null == c) {
+        if (null == org) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
         
-        return Response.ok(c).build();
+        return Response.ok(org).build();
     }
     
     @POST

@@ -15,7 +15,6 @@
  */
 package com.github.nderwin.lee7.authentication;
 
-import java.util.logging.Logger;
 import javax.security.auth.message.config.AuthConfigFactory;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -28,8 +27,6 @@ import javax.servlet.annotation.WebListener;
  */
 @WebListener
 public class StartupListener implements ServletContextListener {
-
-    private static final Logger LOG = Logger.getLogger(StartupListener.class.getName());
 
     @Override
     public void contextInitialized(final ServletContextEvent sce) {

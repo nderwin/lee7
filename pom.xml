@@ -35,6 +35,11 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
+
+        <!-- Dependency Versions -->
+        <arquillian.version>1.1.9.Final</arquillian.version>
+        <jacoco.version>0.7.5.201505241946</jacoco.version>
+        <resteasy.version>3.0.12.Final</resteasy.version>
     </properties>
 
     <dependencyManagement>
@@ -42,7 +47,7 @@
             <dependency>
                 <groupId>org.jboss.arquillian</groupId>
                 <artifactId>arquillian-bom</artifactId>
-                <version>1.1.8.Final</version>
+                <version>${arquillian.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -67,9 +72,9 @@
         
         <!-- Arquillian Test Container -->
         <dependency>
-            <groupId>org.wildfly</groupId>
+            <groupId>org.wildfly.arquillian</groupId>
             <artifactId>wildfly-arquillian-container-managed</artifactId>
-            <version>8.2.1.Final</version>
+            <version>1.0.1.Final</version>
             <scope>test</scope>
         </dependency>
         
@@ -77,13 +82,11 @@
         <dependency>
             <groupId>org.jboss.arquillian.junit</groupId>
             <artifactId>arquillian-junit-container</artifactId>
-            <version>1.1.8.Final</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jboss.arquillian.container</groupId>
             <artifactId>arquillian-container-test-api</artifactId>
-            <version>1.1.8.Final</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -93,21 +96,27 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.jboss.arquillian.extension</groupId>
+            <artifactId>arquillian-persistence-api</artifactId>
+            <version>1.0.0.Alpha7</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.jacoco</groupId>
             <artifactId>org.jacoco.core</artifactId>
-            <version>0.7.5.201505241946</version>
+            <version>${jacoco.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-client</artifactId>
-            <version>3.0.12.Final</version>
+            <version>${resteasy.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-jackson-provider</artifactId>
-            <version>3.0.12.Final</version>
+            <version>${resteasy.version}</version>
             <scope>test</scope>
         </dependency>
 

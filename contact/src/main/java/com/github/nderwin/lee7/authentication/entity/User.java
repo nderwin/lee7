@@ -38,6 +38,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 /**
+ * Representation of a user of the system.
  *
  * @author nderwin
  */

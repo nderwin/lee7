@@ -21,14 +21,18 @@ import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
 
 /**
+ * A logging aspect that logs method invocations with a level of CONFIG.
  *
  * @author nderwin
+ * @see Level
  */
 public class LogAspect {
     
     @AroundInvoke
     public Object logAccess(final InvocationContext ic) throws Exception {
-        Logger.getLogger(ic.getTarget().getClass().getName()).log(Level.CONFIG, "method {0}", ic.getMethod().getName());
+        // log as the target class, not the aspect
+        Logger.getLogger(ic.getTarget().getClass().getName())
+                .log(Level.CONFIG, "method {0}", ic.getMethod().getName());
         
         return ic.proceed();
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 nde.
+ * Copyright 2015 Nathan Erwin.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,12 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
 /**
+ * A listener for the servlet context to allow registering a custom
+ * ServerAuthModule.
  *
- * @author nde
+ * @author nderwin
+ * @see ServerAuthModule
+ * @see HttpServerAuthModule
  */
 @WebListener
 public class StartupListener implements ServletContextListener {

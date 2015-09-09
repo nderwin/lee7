@@ -1,3 +1,18 @@
+/*
+ * Copyright 2015 Nathan Erwin.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.github.nderwin.lee7.authentication;
 
 import com.github.nderwin.lee7.LogAspect;
@@ -6,7 +21,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.enterprise.context.ApplicationScoped;
 import javax.interceptor.Interceptors;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -29,7 +43,13 @@ import static javax.security.auth.message.AuthStatus.SEND_FAILURE;
 import static javax.security.auth.message.AuthStatus.SEND_SUCCESS;
 import static javax.security.auth.message.AuthStatus.SUCCESS;
 
-@ApplicationScoped
+/**
+ * A custom ServerAuthModule that looks for a header variable called
+ * <code>X-Auth-Token</code> to use for validating access to the REST 
+ * resource endpoints.
+ * 
+ * @author nderwin
+ */
 @Interceptors(LogAspect.class)
 public class HttpServerAuthModule implements ServerAuthModule {
 

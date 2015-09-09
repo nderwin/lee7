@@ -16,8 +16,11 @@
 package com.github.nderwin.lee7.authentication;
 
 /**
+ * A transfer object that holds the information needed by the authentication
+ * module.
  *
  * @author nderwin
+ * @see HttpServerAuthModule
  */
 public class UserInformation {
     

@@ -29,6 +29,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 /**
+ * A security role, which can be held by any number of users.
  *
  * @author nderwin
  */

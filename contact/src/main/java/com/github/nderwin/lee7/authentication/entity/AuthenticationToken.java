@@ -27,6 +27,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 /**
+ * The token value is passed with each REST call to prove that the caller
+ * has the authorization to perform the request.
  *
  * @author nderwin
  */
@@ -102,7 +104,7 @@ public class AuthenticationToken implements Serializable {
     }
 
     @Override
-    public boolean equals(Object object) {
+    public boolean equals(final Object object) {
         if (object == null) {
             return false;
         }

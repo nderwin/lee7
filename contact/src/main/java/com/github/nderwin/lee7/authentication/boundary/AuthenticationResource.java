@@ -42,8 +42,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
+ * A RESTful web service that manages the authentication tokens for an
+ * authorized user.
  *
  * @author nderwin
+ * @see User
+ * @see AuthenticationToken
  */
 @Stateless
 @LocalBean

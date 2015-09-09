@@ -16,6 +16,7 @@
 package com.github.nderwin.lee7.authentication.boundary;
 
 import com.github.nderwin.lee7.LogAspect;
+import com.github.nderwin.lee7.authentication.HttpServerAuthModule;
 import com.github.nderwin.lee7.authentication.UserInformation;
 import com.github.nderwin.lee7.authentication.entity.AuthenticationToken;
 import com.github.nderwin.lee7.authentication.entity.User;
@@ -33,8 +34,13 @@ import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 
 /**
+ * A bean for spanning the gap between the ServerAuthModule and the EJB world,
+ * which allows for transactional access to the EntityManager.
  *
  * @author nderwin
+ * @see ServerAuthModule
+ * @see EntityManager
+ * @see HttpServerAuthModule
  */
 @Stateless
 @LocalBean

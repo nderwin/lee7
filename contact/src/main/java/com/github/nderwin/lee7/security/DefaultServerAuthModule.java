@@ -13,17 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.nderwin.lee7.authentication;
+package com.github.nderwin.lee7.security;
 
 import com.github.nderwin.lee7.LogAspect;
-import com.github.nderwin.lee7.authentication.boundary.AuthenticationHelper;
+import jsr375.identitystore.CredentialValidationResult;
+import jsr375.identitystore.IdentityStore;
+import jsr375.identitystore.credential.TokenCredential;
 import java.io.IOException;
+import java.security.Principal;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.enterprise.inject.spi.CDI;
 import javax.interceptor.Interceptors;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -34,43 +36,29 @@ import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
 import javax.security.auth.message.callback.CallerPrincipalCallback;
 import javax.security.auth.message.callback.GroupPrincipalCallback;
-import javax.security.auth.message.callback.PasswordValidationCallback;
 import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import static javax.security.auth.message.AuthStatus.SEND_FAILURE;
+import static jsr375.identitystore.CredentialValidationResult.Status.VALID;
 import static javax.security.auth.message.AuthStatus.SEND_SUCCESS;
 import static javax.security.auth.message.AuthStatus.SUCCESS;
 
 /**
- * A custom ServerAuthModule that looks for a header variable called
- * <code>X-Auth-Token</code> to use for validating access to the REST 
- * resource endpoints.
  * 
  * @author nderwin
  */
 @Interceptors(LogAspect.class)
-public class HttpServerAuthModule implements ServerAuthModule {
+public class DefaultServerAuthModule implements ServerAuthModule {
 
-    private static final Logger LOG = Logger.getLogger(HttpServerAuthModule.class.getName());
+    private static final Logger LOG = Logger.getLogger(DefaultServerAuthModule.class.getName());
 
     private CallbackHandler handler;
-
-    private AuthenticationHelper authHelper;
 
     private final Class<?>[] supportedMessageTypes = new Class[]{
         HttpServletRequest.class,
         HttpServletResponse.class
     };
-
-    public HttpServerAuthModule() {
-        try {
-            authHelper = (AuthenticationHelper) new InitialContext().lookup("java:module/AuthenticationHelper");
-        } catch (NamingException ex) {
-            LOG.log(Level.SEVERE, ex.getMessage(), ex);
-        }
-    }
 
     @Override
     public Class[] getSupportedMessageTypes() {
@@ -102,35 +90,38 @@ public class HttpServerAuthModule implements ServerAuthModule {
                 messageInfo.getMap().get("javax.security.auth.message.MessagePolicy.isMandatory").toString()
         );
 
-        LOG.log(Level.CONFIG, "Authenticating {1} endpoint {0}", new Object[]{
-            request.getRequestURI(),
-            (mandatory ? "protected" : "anonymous")
+        LOG.log(Level.CONFIG, "Authenticating {0} endpoint {1}", new Object[]{
+            (mandatory ? "PROTECTED" : "ANONYMOUS"),
+            request.getRequestURI()
         });
 
         if (mandatory) {
-            String token = request.getHeader("X-Auth-Token");
-
-            if (null == token) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return SEND_FAILURE;
-            }
-            
-            UserInformation user = authHelper.validateToken(token);
-            if (null != user) {
-                callbacks = new Callback[]{
-                    new CallerPrincipalCallback(clientSubject, user.getUsername()),
-                    new PasswordValidationCallback(clientSubject, user.getUsername(), user.getPassword().toCharArray()),
-                    new GroupPrincipalCallback(clientSubject, user.getRoles())
-                };
-
-                try {
-                    handler.handle(callbacks);
-                } catch (IOException | UnsupportedCallbackException e) {
-                    throw (AuthException) new AuthException(e.getMessage()).initCause(e);
+            String token = request.getHeader("Authorization");
+            if (null != token) {
+                IdentityStore identityStore = CDI.current().select(IdentityStore.class).get();
+                
+                CredentialValidationResult result = identityStore.validate(new TokenCredential(false, "", token));
+                
+                if (result.getStatus() == VALID) {
+                    callbacks = new Callback[] {
+                        new CallerPrincipalCallback(clientSubject, result.getCallerName()),
+                        new GroupPrincipalCallback(clientSubject, result.getCallerGroups().toArray(new String[0]))
+                    };
+                } else {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    throw new AuthException("Unauthorized access");
                 }
             } else {
+                callbacks = new Callback[] {
+                    new CallerPrincipalCallback(clientSubject, (Principal) null)
+                };
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return SEND_FAILURE;
+            }
+
+            try {
+                handler.handle(callbacks);
+            } catch (IOException | UnsupportedCallbackException e) {
+                throw (AuthException) new AuthException().initCause(e);
             }
         }
 

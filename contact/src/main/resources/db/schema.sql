@@ -5,8 +5,6 @@
     alter table contact.user_role 
         drop constraint FK_apcc8lxk2xnug8377fatvbn04;
 
-    drop table if exists contact.authentication_token cascade;
-
     drop table if exists contact.organization cascade;
 
     drop table if exists contact.person cascade;
@@ -22,14 +20,6 @@
     drop sequence role_seq;
 
     drop sequence user_seq;
-
-    create table contact.authentication_token (
-        token varchar(255) not null,
-        creationdate timestamp not null,
-        lastuseddate timestamp,
-        username varchar(255) not null,
-        primary key (token)
-    );
 
     create table contact.organization (
         id int8 not null,

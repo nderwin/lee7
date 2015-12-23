@@ -28,7 +28,6 @@ limitations under the License.
             INSERT INTO contact.role(id, name) VALUES (1, 'authenticated-user');
             INSERT INTO contact.user(id, username, password) VALUES (1, 'test', 'test');
             INSERT INTO contact.user_role(user_id, role_id) VALUES (1, 1);
-            INSERT INTO contact.authentication_token(token, creationdate, lastuseddate, username) VALUES ('12345', NOW(), NOW(), 'test');
         </createProcedure>
     </changeSet>
 </databaseChangeLog>

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.nderwin.lee7.authentication.entity;
+package com.github.nderwin.lee7.security.entity;
 
 import java.io.Serializable;
 import java.util.Objects;

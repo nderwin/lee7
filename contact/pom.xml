@@ -45,6 +45,14 @@
         <maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
+    
+    <dependencies>
+        <dependency>
+            <groupId>org.bitbucket.b_c</groupId>
+            <artifactId>jose4j</artifactId>
+            <version>0.4.4</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <finalName>contact</finalName>

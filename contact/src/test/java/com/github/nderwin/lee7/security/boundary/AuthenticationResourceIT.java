@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.nderwin.lee7.authentication.boundary;
+package com.github.nderwin.lee7.security.boundary;
 
 import com.github.nderwin.lee7.LogAspect;
-import com.github.nderwin.lee7.authentication.HttpServerAuthModule;
-import com.github.nderwin.lee7.authentication.entity.AuthenticationToken;
+import com.github.nderwin.lee7.security.DefaultServerAuthModule;
 import com.github.nderwin.lee7.contact.ApplicationConfig;
+import com.github.nderwin.lee7.security.entity.Role;
 import java.net.URL;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Path;
@@ -34,6 +34,8 @@ import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.jboss.shrinkwrap.resolver.api.Resolvers;
+import org.jboss.shrinkwrap.resolver.api.maven.MavenResolverSystem;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -52,16 +54,22 @@ public class AuthenticationResourceIT {
     
     @Deployment
     public static Archive<?> createDeployment() {
-        WebArchive wa = ShrinkWrap.create(WebArchive.class, "test.war");
-        wa.addClass(ApplicationConfig.class);
-        wa.addClass(LogAspect.class);
-        wa.addPackage(HttpServerAuthModule.class.getPackage());
-        wa.addPackage(AuthenticationResource.class.getPackage());
-        wa.addPackage(AuthenticationToken.class.getPackage());
-        wa.addAsResource("persistence.xml", "META-INF/persistence.xml");
-        wa.addAsWebInfResource("beans.xml");
-        wa.addAsWebInfResource("jboss-web.xml");
-        wa.addAsWebInfResource("web.xml");
+        WebArchive wa = ShrinkWrap.create(WebArchive.class, "test.war")
+                .addClass(ApplicationConfig.class)
+                .addClass(LogAspect.class)
+                .addPackage(DefaultServerAuthModule.class.getPackage())
+                .addPackage(AuthenticationResource.class.getPackage())
+                .addPackage(Role.class.getPackage())
+                .addPackages(true, "jsr375")
+                .addAsResource("persistence.xml", "META-INF/persistence.xml")
+                .addAsWebInfResource("beans.xml")
+                .addAsWebInfResource("jboss-web.xml")
+                .addAsWebInfResource("web.xml")
+                .addAsLibraries(Resolvers
+                        .use(MavenResolverSystem.class)
+                        .resolve("org.bitbucket.b_c:jose4j:0.4.4")
+                        .withTransitivity()
+                        .asFile());
 
         return wa;
     }
@@ -73,14 +81,12 @@ public class AuthenticationResourceIT {
                 .post(Entity.json(new LoginPayload("test", "test")));
 
         assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
-        AuthenticationToken token = result.readEntity(AuthenticationToken.class);
-        assertNotNull(token);
-        assertEquals("test", token.getUsername());
-        assertNotNull(token.getToken());
+        String jwt = result.readEntity(String.class);
+        assertNotNull(jwt);
 
         result = createTarget("/logout")
                 .request()
-                .header("X-Auth-Token", token.getToken())
+                .header("Authorization", jwt)
                 .put(null);
 
         assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());

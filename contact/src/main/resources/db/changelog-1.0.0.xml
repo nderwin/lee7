@@ -32,22 +32,6 @@ limitations under the License.
         <createSequence schemaName="contact" sequenceName="user_seq" />
     </changeSet>
     
-    <changeSet id="create-authentication_token" author="nderwin">
-        <comment>Creating the table for the AuthenticationToken entity</comment>
-        <createTable schemaName="contact" tableName="authentication_token">
-            <column name="token" type="VARCHAR(255)">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="contact_authentication_token_PK" />
-            </column>
-            <column name="creationdate" type="TIMESTAMP">
-                <constraints nullable="false" />
-            </column>
-            <column name="lastuseddate" type="TIMESTAMP" />
-            <column name="username" type="VARCHAR(255)">
-                <constraints nullable="false" />
-            </column>
-        </createTable>
-    </changeSet>
-    
     <changeSet id="create-organization" author="nderwin">
         <comment>Creating the table for the Organization entity</comment>
         <createTable schemaName="contact" tableName="organization">

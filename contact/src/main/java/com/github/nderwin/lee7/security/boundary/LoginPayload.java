@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.nderwin.lee7.authentication.boundary;
+package com.github.nderwin.lee7.security.boundary;
 
 import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author nderwin
  */
 @XmlRootElement
-@XmlAccessorType(XmlAccessType.FIELD)
+@XmlAccessorType(XmlAccessType.NONE)
 public class LoginPayload implements Serializable {
 
     private static final long serialVersionUID = 6858272452989290355L;

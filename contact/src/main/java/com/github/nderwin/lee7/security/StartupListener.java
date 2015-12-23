@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.nderwin.lee7.authentication;
+package com.github.nderwin.lee7.security;
 
-import javax.security.auth.message.config.AuthConfigFactory;
+import jsr375.authenticationmechanism.JaspicUtils;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -26,16 +26,14 @@ import javax.servlet.annotation.WebListener;
  * ServerAuthModule.
  *
  * @author nderwin
- * @see ServerAuthModule
- * @see HttpServerAuthModule
+ * @see DefaultServerAuthModule
  */
 @WebListener
 public class StartupListener implements ServletContextListener {
 
     @Override
     public void contextInitialized(final ServletContextEvent sce) {
-        AuthConfigFactory.getFactory().registerConfigProvider(new HttpAuthConfigProvider(new HttpServerAuthModule()), "HttpServlet",
-                getAppContextID(sce.getServletContext()), "Test authentication config provider");
+        JaspicUtils.registerSAM(sce.getServletContext(), new DefaultServerAuthModule());
     }
 
     @Override

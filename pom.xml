@@ -37,13 +37,21 @@
         <maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
 
         <!-- Dependency Versions -->
-        <arquillian.version>1.1.9.Final</arquillian.version>
+        <arquillian.version>1.1.10.Final</arquillian.version>
+        <shrinkwrap.resolver.version>2.2.0</shrinkwrap.resolver.version>
         <jacoco.version>0.7.5.201505241946</jacoco.version>
         <resteasy.version>3.0.12.Final</resteasy.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.jboss.shrinkwrap.resolver</groupId>
+                <artifactId>shrinkwrap-resolver-bom</artifactId>
+                <version>${shrinkwrap.resolver.version}</version>
+                <scope>test</scope>
+                <type>pom</type>
+            </dependency>
             <dependency>
                 <groupId>org.jboss.arquillian</groupId>
                 <artifactId>arquillian-bom</artifactId>
@@ -74,11 +82,18 @@
         <dependency>
             <groupId>org.wildfly.arquillian</groupId>
             <artifactId>wildfly-arquillian-container-managed</artifactId>
-            <version>1.0.1.Final</version>
+            <version>1.0.2.Final</version>
             <scope>test</scope>
         </dependency>
         
         <!-- Arquillian Test Framework Dependencies -->
+        <dependency>
+            <groupId>org.jboss.shrinkwrap.resolver</groupId>
+            <artifactId>shrinkwrap-resolver-depchain</artifactId>
+            <version>${shrinkwrap.resolver.version}</version>
+            <scope>test</scope>
+            <type>pom</type>
+        </dependency>
         <dependency>
             <groupId>org.jboss.arquillian.junit</groupId>
             <artifactId>arquillian-junit-container</artifactId>

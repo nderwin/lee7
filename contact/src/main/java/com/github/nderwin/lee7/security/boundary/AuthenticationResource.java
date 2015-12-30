@@ -16,8 +16,8 @@
 package com.github.nderwin.lee7.security.boundary;
 
 import com.github.nderwin.lee7.LogAspect;
-import com.github.nderwin.lee7.security.entity.User;
 import com.github.nderwin.lee7.security.RsaUtil;
+import com.github.nderwin.lee7.security.entity.User;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -123,7 +123,6 @@ public class AuthenticationResource {
             resp = Response.status(Response.Status.UNAUTHORIZED).build();
         }
 
-        System.out.println("***** login response: " + resp.getStatus() + " : " + resp.getEntity());
         return resp;
     }
 

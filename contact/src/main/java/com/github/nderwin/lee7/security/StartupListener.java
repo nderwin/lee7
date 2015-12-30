@@ -15,11 +15,11 @@
  */
 package com.github.nderwin.lee7.security;
 
-import jsr375.authenticationmechanism.JaspicUtils;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
+import jsr375.authenticationmechanism.JaspicUtils;
 
 /**
  * A listener for the servlet context to allow registering a custom

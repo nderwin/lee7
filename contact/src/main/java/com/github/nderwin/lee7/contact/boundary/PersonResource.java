@@ -28,6 +28,7 @@ import javax.interceptor.Interceptors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -38,6 +39,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -86,9 +88,9 @@ public class PersonResource {
 
     @POST
     @Path("/")
-    public Response save(final Person person) throws URISyntaxException {
+    public Response save(@Context final HttpServletRequest request, final Person person) throws URISyntaxException {
         em.persist(person);
-        return Response.created(URI.create(getClass().getAnnotation(Path.class).value() + "/" + person.getId().toString())).build();
+        return Response.created(URI.create(request.getRequestURI() + "/" + person.getId().toString())).build();
     }
 
     @PUT

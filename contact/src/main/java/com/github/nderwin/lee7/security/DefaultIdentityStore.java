@@ -15,15 +15,15 @@
  */
 package com.github.nderwin.lee7.security;
 
-import jsr375.identitystore.CredentialValidationResult;
-import jsr375.identitystore.IdentityStore;
-import jsr375.identitystore.credential.Credential;
-import jsr375.identitystore.credential.TokenCredential;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import jsr375.identitystore.CredentialValidationResult;
+import jsr375.identitystore.IdentityStore;
+import jsr375.identitystore.credential.Credential;
+import jsr375.identitystore.credential.TokenCredential;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.MalformedClaimException;
 import org.jose4j.jwt.consumer.InvalidJwtException;

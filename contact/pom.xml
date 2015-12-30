@@ -86,7 +86,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${user.home}/.m2/arquillian/${project.artifactId}/wildfly-9.0.1.Final/standalone/configuration</outputDirectory>
+                            <outputDirectory>${user.home}/.m2/arquillian/${project.artifactId}/wildfly-9.0.2.Final/standalone/configuration</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>src/test/resources-wildfly</directory>

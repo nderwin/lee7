@@ -16,9 +16,6 @@
 package com.github.nderwin.lee7.security;
 
 import com.github.nderwin.lee7.LogAspect;
-import jsr375.identitystore.CredentialValidationResult;
-import jsr375.identitystore.IdentityStore;
-import jsr375.identitystore.credential.TokenCredential;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Map;
@@ -39,10 +36,13 @@ import javax.security.auth.message.callback.GroupPrincipalCallback;
 import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import jsr375.identitystore.CredentialValidationResult;
+import jsr375.identitystore.IdentityStore;
+import jsr375.identitystore.credential.TokenCredential;
 
-import static jsr375.identitystore.CredentialValidationResult.Status.VALID;
 import static javax.security.auth.message.AuthStatus.SEND_SUCCESS;
 import static javax.security.auth.message.AuthStatus.SUCCESS;
+import static jsr375.identitystore.CredentialValidationResult.Status.VALID;
 
 /**
  * 
@@ -121,6 +121,7 @@ public class DefaultServerAuthModule implements ServerAuthModule {
             try {
                 handler.handle(callbacks);
             } catch (IOException | UnsupportedCallbackException e) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 throw (AuthException) new AuthException().initCause(e);
             }
         }

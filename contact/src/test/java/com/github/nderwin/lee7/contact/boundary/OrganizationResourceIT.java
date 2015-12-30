@@ -16,10 +16,10 @@
 package com.github.nderwin.lee7.contact.boundary;
 
 import com.github.nderwin.lee7.LogAspect;
-import com.github.nderwin.lee7.security.DefaultServerAuthModule;
-import com.github.nderwin.lee7.security.boundary.AuthenticationResource;
 import com.github.nderwin.lee7.contact.ApplicationConfig;
 import com.github.nderwin.lee7.contact.entity.Organization;
+import com.github.nderwin.lee7.security.DefaultServerAuthModule;
+import com.github.nderwin.lee7.security.boundary.AuthenticationResource;
 import com.github.nderwin.lee7.security.boundary.LoginPayload;
 import java.lang.reflect.Field;
 import java.net.URL;
@@ -77,6 +77,11 @@ public class OrganizationResourceIT {
                 .addAsLibraries(Resolvers
                         .use(MavenResolverSystem.class)
                         .resolve("org.bitbucket.b_c:jose4j:0.4.4")
+                        .withTransitivity()
+                        .asFile())
+                .addAsLibraries(Resolvers
+                        .use(MavenResolverSystem.class)
+                        .resolve("org.mindrot:jbcrypt:0.4")
                         .withTransitivity()
                         .asFile());
 

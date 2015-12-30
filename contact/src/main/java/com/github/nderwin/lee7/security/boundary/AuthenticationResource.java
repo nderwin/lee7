@@ -51,6 +51,7 @@ import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.lang.JoseException;
+import org.mindrot.BCrypt;
 
 /**
  * A RESTful web service that manages the authentication tokens for an
@@ -89,7 +90,7 @@ public class AuthenticationResource {
                     .setParameter("username", payload.getUsername())
                     .getSingleResult();
 
-            if (user.getPassword().equals(payload.getPassword())) {
+            if (BCrypt.checkpw(payload.getPassword(), user.getPassword())) {
                 try {
                     JwtClaims claims = new JwtClaims();
                     claims.setIssuer(rsa.getIssuer());

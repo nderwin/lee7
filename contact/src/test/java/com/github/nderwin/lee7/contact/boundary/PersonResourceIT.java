@@ -16,12 +16,11 @@
 package com.github.nderwin.lee7.contact.boundary;
 
 import com.github.nderwin.lee7.LogAspect;
-import com.github.nderwin.lee7.security.DefaultServerAuthModule;
-import com.github.nderwin.lee7.security.boundary.AuthenticationResource;
 import com.github.nderwin.lee7.contact.ApplicationConfig;
 import com.github.nderwin.lee7.contact.entity.Person;
+import com.github.nderwin.lee7.security.DefaultServerAuthModule;
+import com.github.nderwin.lee7.security.boundary.AuthenticationResource;
 import com.github.nderwin.lee7.security.boundary.LoginPayload;
-import com.github.nderwin.lee7.security.entity.Role;
 import java.lang.reflect.Field;
 import java.net.URL;
 import javax.servlet.http.HttpServletRequest;
@@ -41,7 +40,6 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.Resolvers;
 import org.jboss.shrinkwrap.resolver.api.maven.MavenResolverSystem;
-import org.jose4j.lang.JoseException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -79,6 +77,11 @@ public class PersonResourceIT {
                 .addAsLibraries(Resolvers
                         .use(MavenResolverSystem.class)
                         .resolve("org.bitbucket.b_c:jose4j:0.4.4")
+                        .withTransitivity()
+                        .asFile())
+                .addAsLibraries(Resolvers
+                        .use(MavenResolverSystem.class)
+                        .resolve("org.mindrot:jbcrypt:0.4")
                         .withTransitivity()
                         .asFile());
 

@@ -16,8 +16,8 @@
 package com.github.nderwin.lee7.security.boundary;
 
 import com.github.nderwin.lee7.LogAspect;
-import com.github.nderwin.lee7.security.DefaultServerAuthModule;
 import com.github.nderwin.lee7.contact.ApplicationConfig;
+import com.github.nderwin.lee7.security.DefaultServerAuthModule;
 import com.github.nderwin.lee7.security.entity.Role;
 import java.net.URL;
 import javax.ws.rs.ApplicationPath;
@@ -68,6 +68,11 @@ public class AuthenticationResourceIT {
                 .addAsLibraries(Resolvers
                         .use(MavenResolverSystem.class)
                         .resolve("org.bitbucket.b_c:jose4j:0.4.4")
+                        .withTransitivity()
+                        .asFile())
+                .addAsLibraries(Resolvers
+                        .use(MavenResolverSystem.class)
+                        .resolve("org.mindrot:jbcrypt:0.4")
                         .withTransitivity()
                         .asFile());
 

@@ -36,6 +36,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import org.mindrot.BCrypt;
 
 /**
  * Representation of a user of the system.
@@ -99,7 +100,7 @@ public class User implements Serializable {
     }
 
     public void setPassword(final String password) {
-        this.password = password;
+        this.password = BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
     public Set<Role> getRoles() {

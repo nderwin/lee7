@@ -1,0 +1,51 @@
+@startuml
+hide footbox
+skinparam sequence {
+    ActorBorderColor black
+    ActorBackgroundColor white
+    ArrowColor black
+    BackgroundColor white
+    BoxBorderColor black
+    LifeLineBorderColor black
+    ParticipantBorderColor black
+    ParticipantBackgroundColor white
+}
+
+actor Wildfly
+
+box "lee7 security" #ccddff
+participant StartupListener
+participant DefaultServerAuthModule
+end box
+
+box "jsr375" #ffddcc
+participant JaspicUtils
+participant DefaultAuthConfigProvider
+end box
+
+box "javax.security"
+participant AuthConfigFactory
+end box
+
+Wildfly -> StartupListener : contextInitialized(ServletContextEvent)
+activate StartupListener
+
+    create DefaultServerAuthModule
+    StartupListener -> DefaultServerAuthModule : <<create>>
+    StartupListener -> JaspicUtils : registerSAM(ServletContext, ServerAuthModule)
+    activate JaspicUtils
+
+        create DefaultAuthConfigProvider
+        JaspicUtils -> DefaultAuthConfigProvider : <<create>>
+        JaspicUtils -> AuthConfigFactory : registerConfigProvider(AuthConfigProvider, String, String, String)
+        activate AuthConfigFactory
+        AuthConfigFactory --> JaspicUtils
+        deactivate AuthConfigFactory
+
+    JaspicUtils --> StartupListener
+    deactivate JaspicUtils
+
+StartupListener --> Wildfly
+deactivate StartupListener
+
+@enduml

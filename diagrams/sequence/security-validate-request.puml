@@ -1,0 +1,58 @@
+@startuml
+hide footbox
+skinparam sequence {
+    ActorBorderColor black
+    ActorBackgroundColor white
+    ArrowColor black
+    BackgroundColor white
+    BoxBorderColor black
+    LifeLineBorderColor black
+    ParticipantBorderColor black
+    ParticipantBackgroundColor white
+}
+
+actor User
+actor Wildfly
+
+User -> Wildfly : GET /contact/resources/organizations
+activate Wildfly
+
+    Wildfly -> DefaultServerAuthModule : validateRequest(MessageInfo, Subject, Subject)
+    activate DefaultServerAuthModule
+
+    note right of DefaultServerAuthModule
+        DefaultServerAuthModule checks 
+            javax.security.auth.message.MessagePolicy.isMandatory
+        which consults web.xml to see if security should be
+        enforced on this request based on URL matching
+    end note
+
+    alt secured URL
+        DefaultServerAuthModule -> CDI : current().select(IdentityStore.class).get()
+        activate CDI
+        CDI --> DefaultServerAuthModule : DefaultIdentityStore
+        deactivate CDI
+
+        DefaultServerAuthModule -> DefaultIdentityStore : validate(Credential)
+        activate DefaultIdentityStore
+        DefaultIdentityStore --> DefaultServerAuthModule
+        deactivate DefaultIdentityStore
+
+        DefaultServerAuthModule -> CallbackHandler : handle(Callback[])
+        activate CallbackHandler
+        CallbackHandler --> DefaultServerAuthModule
+        deactivate CallbackHandler
+    else return AuthStatus.SUCCESS
+    end
+
+alt
+    DefaultServerAuthModule --> Wildfly : AuthStatus.SUCCESS
+    Wildfly --> User : 200 - JSON with paged results
+else 
+    DefaultServerAuthModule --> Wildfly : AuthException thrown
+    Wildfly --> User : 401 Unauthorized
+end
+    deactivate DefaultServerAuthModule
+deactivate Wildfly
+
+@enduml

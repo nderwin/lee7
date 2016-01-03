@@ -1,0 +1,15 @@
+@startuml
+hide circle
+hide stereotype
+skinparam class {
+    BackgroundColor white
+    BorderColor black
+    ArrowColor black
+    BackgroundColor<<Party>> #9cd3ad
+    BackgroundColor<<Place>> #9cd3ad
+    BackgroundColor<<Thing>> #9cd3ad
+    BackgroundColor<<Role>> #ffffce
+    BackgroundColor<<Moment-Interval>> #efbab5
+    BackgroundColor<<Description>> #94b6ce
+}
+@enduml

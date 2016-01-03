@@ -1,0 +1,139 @@
+@startuml
+hide circle
+hide stereotype
+skinparam class {
+    BackgroundColor white
+    BorderColor black
+    ArrowColor black
+    BackgroundColor<<Party>> #9cd3ad
+    BackgroundColor<<Place>> #9cd3ad
+    BackgroundColor<<Thing>> #9cd3ad
+    BackgroundColor<<Role>> #ffffce
+    BackgroundColor<<Moment-Interval>> #efbab5
+    BackgroundColor<<Description>> #94b6ce
+}
+
+package javax.persistence {
+    interface EntityManager
+}
+
+package javax.security.auth.message.module {
+    interface ServerAuthModule
+}
+
+package javax.servlet {
+    interface ServletContextListener
+}
+
+package jsr375 {
+    package identitystore {
+        interface IdentityStore
+    }
+}
+
+package security {
+    class DefaultIdentityStore<<Moment-Interval>> {
+        +validate(Credential) : CredentialValidationResult
+        +validate(TokenCredential) : CredentialValidationResult
+    }
+    
+    DefaultIdentityStore .left.|> IdentityStore
+    DefaultIdentityStore --> RsaUtil : rsa
+
+    class DefaultServerAuthModule<<Moment-Interval>> {
+        -handler : CallbackHandler
+        -supportedMessageTypes : Class<?>[]
+
+        +getSupportedMessageTypes() : Class[]
+        +initialize(MessagePolicy, MessagePolicy, CallbackHandler, Map) : void
+        +cleanSubject(MessageInfo, Subject) : void
+        +secureResponse(MessageInfo, Subject) : AuthStatus
+        +validateRequest(MessageInfo, Subject , Subject) : AuthStatus
+    }
+
+    DefaultServerAuthModule .up.|> ServerAuthModule
+
+    class RsaUtil<<Moment-Interval>> {
+        -rsaJsonWebKey : RsaJsonWebKey
+
+        +init() : void
+        +getRsaJsonWebKey() : RsaJsonWebKey
+        +getIssuer() : String
+    }
+
+    class StartupListener<<Moment-Interval>> {
+        +{static}getAppContextID(ServletContext) : String
+
+        +contextInitialized(ServletContextEvent) : void
+        +contextDestroyed(ServletContextEvent) : void
+    }
+
+    StartupListener .down.|> ServletContextListener
+    StartupListener .up.> DefaultServerAuthModule
+
+    package boundary {
+        class AuthenticationResource<<Moment-Interval>> {
+            +login(HttpServletRequest, LoginPayload) : Response
+            +logout(HttpServletRequest) : Response
+        }
+
+        AuthenticationResource -up-> EntityManager : em
+        AuthenticationResource --> RsaUtil : rsa
+
+        class LoginPayload<<Description>> {
+            -username : String
+            -password : String
+
+            +LoginPayload()
+            +LoginPayload(String, String)
+
+            +getUsername() : String
+            +setUsername(String) : void
+            +getPassword() : String
+            +setPassword(String) : void
+        }
+    }
+
+    package entity {
+        class Role<<Role>> {
+            -id : Long
+            -name : String
+
+            #Role()
+            +Role(String)
+
+            +getId() : Long
+            +getName() : String
+
+            +equals(Object) : boolean
+            +hashCode() : int
+            +toString() : String
+        }
+
+        class User<<Party>> {
+            -id : Long
+            -username : String
+            -password : String
+
+            #User()
+            +User(String)
+
+            +getId() : Long
+            +getUsername() : String
+            +getPassword() : String
+            +setPassword(String) : void
+            +getRoles() : Set<Role>
+            +setRoles(Set<Role>) : void
+            +addRole(Role) : void
+            +removeRole(Role) : void
+
+            +equals(Object) : boolean
+            +hashCode() : int
+            +toString() : String
+        }
+
+        User o-- Role : roles
+    }
+}
+
+@enduml

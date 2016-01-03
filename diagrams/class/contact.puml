@@ -1,0 +1,119 @@
+@startuml
+hide circle
+hide stereotype
+skinparam class {
+    BackgroundColor white
+    BorderColor black
+    ArrowColor black
+    BackgroundColor<<Party>> #9cd3ad
+    BackgroundColor<<Place>> #9cd3ad
+    BackgroundColor<<Thing>> #9cd3ad
+    BackgroundColor<<Role>> #ffffce
+    BackgroundColor<<Moment-Interval>> #efbab5
+    BackgroundColor<<Description>> #94b6ce
+}
+
+package javax.ws.rs {
+    package core {
+        class Application
+    }
+
+    package ext {
+        interface ExceptionMapper
+    }
+}
+
+package javax.persistence {
+    interface EntityManager
+}
+
+package contact {
+    class ApplicationConfig<<Description>>
+
+    ApplicationConfig .up.|> Application
+
+    package boundary {
+        class OrganizationResource<<Moment-Interval>> {
+            +getAll(int, int) : Response
+            +get(Long) : Response
+            +save(HttpServletRequest, Organization) : Response
+            +update(Long, Organization) : Response
+            +delete(Long) : Response
+        }
+
+        OrganizationResource -up-> EntityManager : em
+
+        class PersonResource<<Moment-Interval>> {
+            +getAll(int, int) : Response
+            +get(Long) : Response
+            +save(HttpServletRequest, Person) : Response
+            +update(Long, Person) : Response
+            +delete(Long) : Response
+        }
+
+        PersonResource -up-> EntityManager : em
+
+        class PagingListWrapper<T><<Moment-Interval>> {
+            -limit : int
+            -offset : int
+            -data : List<T>
+
+            +PagingListWrapper()
+            +PagingListWrapper(List<T>)
+            +PagingListWrapper(int, int, List<T>)
+
+            +getLimit() : int
+            +getOffset() : int
+            +getData() : List<T>
+        }
+
+        class ResourceExceptionMapper<<Moment-Interval>> {
+            +toResponse(Exception) : Response
+        }
+
+        ResourceExceptionMapper .up.|> ExceptionMapper
+    }
+
+    package entity {
+        abstract class LegalEntity<<Party>> {
+            -id : Long
+
+            +getId() : Long
+        }
+
+        class Person<<Party>> {
+            -surname : String
+            -givenName : String
+
+            #Person()
+            +Person(String, String)
+
+            +getSurname() : String
+            +setSurname(String) : void
+            +getGivenName() : String
+            +setGivenName(String) : void
+
+            +equals(Object) : boolean
+            +hashCode() : int
+            +toString() : String
+        }
+
+        class Organization<<Party>> {
+            -name : String
+
+            #Organization()
+            +Organization(String)
+
+            +getName() : String
+            +setName(String) : void
+
+            +equals(Object) : boolean
+            +hashCode() : int
+            +toString() : String
+        }
+
+        Person -up-|> LegalEntity
+        Organization -up-|> LegalEntity
+    }
+}
+@enduml

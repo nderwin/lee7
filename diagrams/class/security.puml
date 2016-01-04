@@ -95,12 +95,12 @@ package security {
     }
 
     package entity {
-        class Role<<Role>> {
+        class SecurityRole<<Role>> {
             -id : Long
             -name : String
 
-            #Role()
-            +Role(String)
+            #SecurityRole()
+            +SecurityRole(String)
 
             +getId() : Long
             +getName() : String
@@ -110,13 +110,13 @@ package security {
             +toString() : String
         }
 
-        class User<<Party>> {
+        class Caller<<Party>> {
             -id : Long
             -username : String
             -password : String
 
-            #User()
-            +User(String)
+            #Caller()
+            +Caller(String)
 
             +getId() : Long
             +getUsername() : String
@@ -132,7 +132,7 @@ package security {
             +toString() : String
         }
 
-        User o-- Role : roles
+        Caller o-- SecurityRole : roles
     }
 }
 

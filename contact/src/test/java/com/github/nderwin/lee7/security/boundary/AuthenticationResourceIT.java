@@ -18,7 +18,7 @@ package com.github.nderwin.lee7.security.boundary;
 import com.github.nderwin.lee7.LogAspect;
 import com.github.nderwin.lee7.contact.ApplicationConfig;
 import com.github.nderwin.lee7.security.DefaultServerAuthModule;
-import com.github.nderwin.lee7.security.entity.Role;
+import com.github.nderwin.lee7.security.entity.SecurityRole;
 import java.net.URL;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Path;
@@ -59,7 +59,7 @@ public class AuthenticationResourceIT {
                 .addClass(LogAspect.class)
                 .addPackage(DefaultServerAuthModule.class.getPackage())
                 .addPackage(AuthenticationResource.class.getPackage())
-                .addPackage(Role.class.getPackage())
+                .addPackage(SecurityRole.class.getPackage())
                 .addPackages(true, "jsr375")
                 .addAsResource("persistence.xml", "META-INF/persistence.xml")
                 .addAsWebInfResource("beans.xml")

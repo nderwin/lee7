@@ -26,12 +26,6 @@ limitations under the License.
         <createSequence schemaName="contact" sequenceName="legal_entity_seq" />
     </changeSet>
     
-    <changeSet id="create-authentication-sequences" author="nderwin">
-        <comment>Creating the primary key sequence for User, Role</comment>
-        <createSequence schemaName="contact" sequenceName="role_seq" />
-        <createSequence schemaName="contact" sequenceName="user_seq" />
-    </changeSet>
-    
     <changeSet id="create-organization" author="nderwin">
         <comment>Creating the table for the Organization entity</comment>
         <createTable schemaName="contact" tableName="organization">
@@ -57,28 +51,34 @@ limitations under the License.
         </createTable>
     </changeSet>
     
-    <changeSet id="create-role" author="nderwin">
-        <comment>Creating the table for the Role entity</comment>
-        <createTable schemaName="contact" tableName="role">
+    <changeSet id="create-authentication-sequences" author="nderwin">
+        <comment>Creating the primary key sequence for Caller, Role</comment>
+        <createSequence schemaName="contact" sequenceName="caller_seq" />
+        <createSequence schemaName="contact" sequenceName="security_role_seq" />
+    </changeSet>
+    
+    <changeSet id="create-security_role" author="nderwin">
+        <comment>Creating the table for the SecurityRole entity</comment>
+        <createTable schemaName="contact" tableName="security_role">
             <column name="id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="contact_role_PK" />
+                <constraints nullable="false" primaryKey="true" primaryKeyName="contact_security_role_PK" />
             </column>
             <column name="name" type="VARCHAR(255)">
                 <constraints nullable="false" />
             </column>
         </createTable>
         
-        <addUniqueConstraint schemaName="contact" tableName="role" columnNames="name" constraintName="role_name_UK" />
-        <createIndex schemaName="contact" tableName="role" indexName="role_name_IDX">
+        <addUniqueConstraint schemaName="contact" tableName="security_role" columnNames="name" constraintName="security_role_name_UK" />
+        <createIndex schemaName="contact" tableName="security_role" indexName="security_role_name_IDX">
             <column name="name" />
         </createIndex>
     </changeSet>
     
-    <changeSet id="create-user" author="nderwin">
-        <comment>Creating the table for the User entity</comment>
-        <createTable schemaName="contact" tableName="user">
+    <changeSet id="create-caller" author="nderwin">
+        <comment>Creating the table for the Caller entity</comment>
+        <createTable schemaName="contact" tableName="caller">
             <column name="id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="contact_user_PK" />
+                <constraints nullable="false" primaryKey="true" primaryKeyName="contact_caller_PK" />
             </column>
             <column name="password" type="VARCHAR(255)">
                 <constraints nullable="false" />
@@ -88,16 +88,16 @@ limitations under the License.
             </column>
         </createTable>
         
-        <addUniqueConstraint schemaName="contact" tableName="user" columnNames="username" constraintName="user_username_UK" />
-        <createIndex schemaName="contact" tableName="user" indexName="user_username_IDX">
+        <addUniqueConstraint schemaName="contact" tableName="caller" columnNames="username" constraintName="caller_username_UK" />
+        <createIndex schemaName="contact" tableName="caller" indexName="caller_username_IDX">
             <column name="username" />
         </createIndex>
     </changeSet>
     
-    <changeSet id="create-user_role" author="nderwin">
-        <comment>Creating the table for the User-Role relationship</comment>
-        <createTable schemaName="contact" tableName="user_role">
-            <column name="user_id" type="BIGINT">
+    <changeSet id="create-caller_role" author="nderwin">
+        <comment>Creating the table for the Caller-Role relationship</comment>
+        <createTable schemaName="contact" tableName="caller_role">
+            <column name="caller_id" type="BIGINT">
                 <constraints nullable="false" />
             </column>
             <column name="role_id" type="BIGINT">
@@ -105,14 +105,14 @@ limitations under the License.
             </column>
         </createTable>
         
-        <addPrimaryKey schemaName="contact" tableName="user_role" columnNames="user_id, role_id" constraintName="contact_user_role_PK" />
-        <createIndex schemaName="contact" tableName="user_role" indexName="contact_user_role_role_IDX">
+        <addPrimaryKey schemaName="contact" tableName="caller_role" columnNames="caller_id, role_id" constraintName="contact_caller_role_PK" />
+        <createIndex schemaName="contact" tableName="caller_role" indexName="contact_caller_role_role_IDX">
             <column name="role_id" />
         </createIndex>
-        <createIndex schemaName="contact" tableName="user_role" indexName="contact_user_role_user_IDX">
-            <column name="user_id" />
+        <createIndex schemaName="contact" tableName="caller_role" indexName="contact_caller_role_user_IDX">
+            <column name="caller_id" />
         </createIndex>
-        <addForeignKeyConstraint baseTableSchemaName="contact" baseTableName="user_role" baseColumnNames="role_id" constraintName="contact_user_role_role_FK" referencedTableSchemaName="contact" referencedTableName="role" referencedColumnNames="id" />
-        <addForeignKeyConstraint baseTableSchemaName="contact" baseTableName="user_role" baseColumnNames="user_id" constraintName="contact_user_role_user_FK" referencedTableSchemaName="contact" referencedTableName="user" referencedColumnNames="id" />
+        <addForeignKeyConstraint baseTableSchemaName="contact" baseTableName="caller_role" baseColumnNames="role_id" constraintName="contact_caller_role_role_FK" referencedTableSchemaName="contact" referencedTableName="security_role" referencedColumnNames="id" />
+        <addForeignKeyConstraint baseTableSchemaName="contact" baseTableName="caller_role" baseColumnNames="caller_id" constraintName="contact_caller_role_user_FK" referencedTableSchemaName="contact" referencedTableName="caller" referencedColumnNames="id" />
     </changeSet>
 </databaseChangeLog>

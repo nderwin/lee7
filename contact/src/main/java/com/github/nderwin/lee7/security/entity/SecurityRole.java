@@ -33,19 +33,19 @@ import javax.persistence.UniqueConstraint;
  *
  * @author nderwin
  */
-@Entity(name = "Role")
-@Table(schema = "contact", name = "role", indexes = {
-    @Index(name = "role_name_idx", unique = true, columnList = "name")
+@Entity(name = "SecurityRole")
+@Table(schema = "contact", name = "security_role", indexes = {
+    @Index(name = "security_role_name_idx", unique = true, columnList = "name")
 }, uniqueConstraints = {
-    @UniqueConstraint(name = "role_name_UK", columnNames = "name")
+    @UniqueConstraint(name = "security_role_name_UK", columnNames = "name")
 })
-public class Role implements Serializable {
+public class SecurityRole implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Id
-    @SequenceGenerator(schema = "contact", name = "role_seq", sequenceName = "role_seq", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "role_seq")
+    @SequenceGenerator(schema = "contact", name = "security_role_seq", sequenceName = "security_role_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "security_role_seq")
     @Column(name = "id", nullable = false)
     private Long id;
 
@@ -53,10 +53,10 @@ public class Role implements Serializable {
     @Column(name = "name", nullable = false, length = 255, unique = true)
     private String name;
     
-    protected Role() {
+    protected SecurityRole() {
     }
 
-    public Role(final String name) {
+    public SecurityRole(final String name) {
         if (null == name || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Group name must be non-null and non-blank");
         }
@@ -87,14 +87,14 @@ public class Role implements Serializable {
             return false;
         }
 
-        final Role other = (Role) object;
+        final SecurityRole other = (SecurityRole) object;
 
         return Objects.equals(this.name, other.name);
     }
 
     @Override
     public String toString() {
-        return "Role{name=" + name + "}";
+        return "SecurityRole{name=" + name + "}";
     }
 
 }

@@ -25,9 +25,9 @@ limitations under the License.
     
     <changeSet id="bootstrap-integration-test-data" author="nderwin" runAlways="true" context="test">
         <createProcedure>
-            INSERT INTO contact.role(id, name) VALUES (1, 'authenticated-user');
-            INSERT INTO contact.user(id, username, password) VALUES (1, 'test', '$2a$10$LOixr2srt.2jCRa8kkK.V.L8YIuZE/zu20Mx3cyHO5R0rNTLaUlSu');
-            INSERT INTO contact.user_role(user_id, role_id) VALUES (1, 1);
+            INSERT INTO contact.security_role(id, name) VALUES (1, 'authenticated-user');
+            INSERT INTO contact.caller(id, username, password) VALUES (1, 'test', '$2a$10$LOixr2srt.2jCRa8kkK.V.L8YIuZE/zu20Mx3cyHO5R0rNTLaUlSu');
+            INSERT INTO contact.caller_role(caller_id, role_id) VALUES (1, 1);
         </createProcedure>
     </changeSet>
 </databaseChangeLog>

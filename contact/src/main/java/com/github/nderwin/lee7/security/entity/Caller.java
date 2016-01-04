@@ -43,22 +43,22 @@ import org.mindrot.BCrypt;
  *
  * @author nderwin
  */
-@Entity(name = "User")
-@Table(schema = "contact", name = "user", indexes = {
-    @Index(name = "user_username_idx", unique = true, columnList = "username")
+@Entity(name = "Caller")
+@Table(schema = "contact", name = "caller", indexes = {
+    @Index(name = "caller_username_idx", unique = true, columnList = "username")
 }, uniqueConstraints = {
-    @UniqueConstraint(name = "user_username_UK", columnNames = "username")
+    @UniqueConstraint(name = "caller_username_UK", columnNames = "username")
 })
 @NamedQueries(value = {
-    @NamedQuery(name = "findByUsername", query = "SELECT u FROM User u WHERE LOWER(u.username) = LOWER(:username) ")
+    @NamedQuery(name = "findByUsername", query = "SELECT c FROM Caller c WHERE LOWER(c.username) = LOWER(:username) ")
 })
-public class User implements Serializable {
+public class Caller implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Id
-    @SequenceGenerator(schema = "contact", name = "user_seq", sequenceName = "user_seq", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
+    @SequenceGenerator(schema = "contact", name = "caller_seq", sequenceName = "caller_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "caller_seq")
     @Column(name = "id", nullable = false)
     private Long id;
 
@@ -71,15 +71,15 @@ public class User implements Serializable {
     private String password;
 
     @ManyToMany(cascade = CascadeType.DETACH)
-    @JoinTable(schema = "contact", name = "user_role", joinColumns = {
-        @JoinColumn(name = "user_id", referencedColumnName = "id")}, inverseJoinColumns = {
+    @JoinTable(schema = "contact", name = "caller_role", joinColumns = {
+        @JoinColumn(name = "caller_id", referencedColumnName = "id")}, inverseJoinColumns = {
         @JoinColumn(name = "role_id", referencedColumnName = "id")})
-    private Set<Role> roles = new HashSet<>();
+    private Set<SecurityRole> roles = new HashSet<>();
 
-    protected User() {
+    protected Caller() {
     }
 
-    public User(final String username) {
+    public Caller(final String username) {
         if (null == username || username.trim().isEmpty()) {
             throw new IllegalArgumentException("Username must be a non-null, non-blank value");
         }
@@ -103,20 +103,20 @@ public class User implements Serializable {
         this.password = BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
-    public Set<Role> getRoles() {
+    public Set<SecurityRole> getRoles() {
         return Collections.unmodifiableSet(roles);
     }
 
-    public void setRoles(final Set<Role> roles) {
+    public void setRoles(final Set<SecurityRole> roles) {
         this.roles.clear();
         this.roles.addAll(roles);
     }
 
-    public void addRole(final Role role) {
+    public void addRole(final SecurityRole role) {
         this.roles.add(role);
     }
 
-    public void removeRole(final Role role) {
+    public void removeRole(final SecurityRole role) {
         this.roles.remove(role);
     }
 
@@ -135,14 +135,14 @@ public class User implements Serializable {
             return false;
         }
 
-        final User other = (User) object;
+        final Caller other = (Caller) object;
 
         return Objects.equals(this.username, other.username);
     }
 
     @Override
     public String toString() {
-        return "User{username=" + username + "}";
+        return "Caller{username=" + username + "}";
     }
 
 }

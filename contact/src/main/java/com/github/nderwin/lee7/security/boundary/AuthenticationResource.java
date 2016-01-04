@@ -17,7 +17,7 @@ package com.github.nderwin.lee7.security.boundary;
 
 import com.github.nderwin.lee7.LogAspect;
 import com.github.nderwin.lee7.security.RsaUtil;
-import com.github.nderwin.lee7.security.entity.User;
+import com.github.nderwin.lee7.security.entity.Caller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -58,7 +58,7 @@ import org.mindrot.BCrypt;
  * authorized user.
  *
  * @author nderwin
- * @see User
+ * @see Caller
  */
 @Stateless
 @LocalBean
@@ -86,7 +86,7 @@ public class AuthenticationResource {
 
         try {
             // validate username and password (insensitive search for username)
-            User user = em.createNamedQuery("findByUsername", User.class)
+            Caller user = em.createNamedQuery("findByUsername", Caller.class)
                     .setParameter("username", payload.getUsername())
                     .getSingleResult();
 

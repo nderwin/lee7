@@ -26,7 +26,8 @@ import javax.persistence.InheritanceType;
 import javax.persistence.SequenceGenerator;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlID;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * A legally recognized entity.
@@ -36,6 +37,7 @@ import javax.xml.bind.annotation.XmlID;
 @Entity(name = "LegalEntity")
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @XmlAccessorType(XmlAccessType.FIELD)
+@XmlTransient
 public abstract class LegalEntity implements Serializable {
 
     private static final long serialVersionUID = -1822203393624550172L;
@@ -44,7 +46,7 @@ public abstract class LegalEntity implements Serializable {
     @SequenceGenerator(schema = "contact", name = "legal_entity_seq", sequenceName = "legal_entity_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "legal_entity_seq")
     @Column(name = "id", nullable = false)
-    @XmlID
+    @XmlElement(nillable = true)
     private Long id;
 
     public Long getId() {

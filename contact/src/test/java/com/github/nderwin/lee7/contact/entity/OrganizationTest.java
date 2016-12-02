@@ -21,13 +21,14 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import org.eclipse.persistence.jaxb.MarshallerProperties;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -62,7 +63,6 @@ public class OrganizationTest {
         assertEquals(violations.size(), 1);
     }
     
-    @Ignore
     @Test
     public void testSerialization() throws JSONException, JAXBException {
         Organization testMe = new Organization("ACME Supply Company");
@@ -71,10 +71,15 @@ public class OrganizationTest {
         expected.put("id", JSONObject.NULL);
         expected.put("name", testMe.getName());
 
-        JAXBContext jaxbContext = JAXBContext.newInstance(Organization.class);
         StringWriter sw = new StringWriter();
+        JAXBContext jaxbContext = JAXBContext.newInstance(Organization.class);
         Marshaller m = jaxbContext.createMarshaller();
+        m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+        m.setProperty(MarshallerProperties.MEDIA_TYPE, MediaType.APPLICATION_JSON);
+        m.setProperty(MarshallerProperties.JSON_INCLUDE_ROOT, false);
+        m.setProperty(MarshallerProperties.JSON_TYPE_COMPATIBILITY, false);
         m.marshal(testMe, sw);
+        
         JSONAssert.assertEquals(expected.toString(0), sw.toString(), true);
     }
 }

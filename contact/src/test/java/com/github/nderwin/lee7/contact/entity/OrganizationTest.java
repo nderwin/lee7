@@ -15,13 +15,21 @@
  */
 package com.github.nderwin.lee7.contact.entity;
 
+import java.io.StringWriter;
 import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import static org.junit.Assert.assertEquals;
 
@@ -52,5 +60,21 @@ public class OrganizationTest {
         testMe.setName(null);
         Set<ConstraintViolation<Organization>> violations = validator.validate(testMe);
         assertEquals(violations.size(), 1);
+    }
+    
+    @Ignore
+    @Test
+    public void testSerialization() throws JSONException, JAXBException {
+        Organization testMe = new Organization("ACME Supply Company");
+        
+        JSONObject expected = new JSONObject();
+        expected.put("id", JSONObject.NULL);
+        expected.put("name", testMe.getName());
+
+        JAXBContext jaxbContext = JAXBContext.newInstance(Organization.class);
+        StringWriter sw = new StringWriter();
+        Marshaller m = jaxbContext.createMarshaller();
+        m.marshal(testMe, sw);
+        JSONAssert.assertEquals(expected.toString(0), sw.toString(), true);
     }
 }

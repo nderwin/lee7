@@ -72,7 +72,9 @@ public class OrganizationTest {
         expected.put("name", testMe.getName());
 
         StringWriter sw = new StringWriter();
+
         JAXBContext jaxbContext = JAXBContext.newInstance(Organization.class);
+
         Marshaller m = jaxbContext.createMarshaller();
         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         m.setProperty(MarshallerProperties.MEDIA_TYPE, MediaType.APPLICATION_JSON);
@@ -80,6 +82,6 @@ public class OrganizationTest {
         m.setProperty(MarshallerProperties.JSON_TYPE_COMPATIBILITY, false);
         m.marshal(testMe, sw);
         
-        JSONAssert.assertEquals(expected.toString(0), sw.toString(), true);
+        JSONAssert.assertEquals(expected.toString(4), sw.toString(), true);
     }
 }

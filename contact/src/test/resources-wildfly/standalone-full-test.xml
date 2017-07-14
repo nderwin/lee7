@@ -150,7 +150,7 @@
                         <password>sa</password>
                     </security>
                 </datasource>
-                <datasource jta="false" jndi-name="java:jboss/datasources/contactDS" pool-name="contactDS" enabled="true" use-ccm="false">
+                <datasource jta="false" jndi-name="java:/contactDS" pool-name="contactDS" enabled="true" use-ccm="false">
                     <connection-url>jdbc:postgresql://localhost:5432/lee7_test</connection-url>
                     <driver-class>org.postgresql.Driver</driver-class>
                     <driver>postgres</driver>

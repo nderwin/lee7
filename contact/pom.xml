@@ -223,7 +223,7 @@
                             <dependency>
                                 <groupId>org.postgresql</groupId>
                                 <artifactId>postgresql</artifactId>
-                                <version>9.3-1102-jdbc41</version>
+                                <version>42.1.1</version>
                             </dependency>
                         </dependencies>
                         <executions>
@@ -324,7 +324,7 @@
                             <dependency>
                                 <groupId>org.postgresql</groupId>
                                 <artifactId>postgresql</artifactId>
-                                <version>9.3-1102-jdbc41</version>
+                                <version>42.1.1</version>
                             </dependency>
                         </dependencies>
                         <executions>

@@ -18,6 +18,7 @@ package com.github.nderwin.lee7.contact.boundary;
 import com.github.nderwin.lee7.contact.entity.Organization;
 import java.net.URI;
 import java.net.URISyntaxException;
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -51,6 +52,7 @@ import javax.ws.rs.core.Response;
 @Path("/organizations")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@RolesAllowed({"user"})
 public class OrganizationResource {
     
     @PersistenceContext

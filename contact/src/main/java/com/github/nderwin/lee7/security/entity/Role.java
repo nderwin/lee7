@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Nathan Erwin.
+ * Copyright 2017 Nathan Erwin.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.nderwin.lee7.contact;
-
-import javax.annotation.security.DeclareRoles;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+package com.github.nderwin.lee7.security.entity;
 
 /**
- * Minimal configuration for enabling REST Web Services.
  *
  * @author nderwin
  */
-@ApplicationPath("resources")
-@DeclareRoles({"user", "admin"})
-public class ApplicationConfig extends Application {
+public enum Role {
+
+    USER,
+    ADMIN
+    
 }

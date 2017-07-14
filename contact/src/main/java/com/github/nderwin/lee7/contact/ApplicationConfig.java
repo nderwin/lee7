@@ -23,6 +23,6 @@ import javax.ws.rs.core.Application;
  *
  * @author nderwin
  */
-@ApplicationPath("contact")
+@ApplicationPath("resources")
 public class ApplicationConfig extends Application {
 }

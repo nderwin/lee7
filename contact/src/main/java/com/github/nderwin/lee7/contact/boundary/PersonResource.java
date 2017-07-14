@@ -51,7 +51,7 @@ import javax.ws.rs.core.Response;
 @Path("/people")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@RolesAllowed({"user"})
+@RolesAllowed({"USER"})
 public class PersonResource {
 
     @PersistenceContext

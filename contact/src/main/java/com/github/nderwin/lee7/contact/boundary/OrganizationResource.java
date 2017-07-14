@@ -52,7 +52,7 @@ import javax.ws.rs.core.Response;
 @Path("/organizations")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@RolesAllowed({"user"})
+@RolesAllowed({"USER"})
 public class OrganizationResource {
     
     @PersistenceContext

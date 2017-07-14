@@ -25,6 +25,6 @@ import javax.ws.rs.core.Application;
  * @author nderwin
  */
 @ApplicationPath("resources")
-@DeclareRoles({"user", "admin"})
+@DeclareRoles({"USER", "ADMIN"})
 public class ApplicationConfig extends Application {
 }

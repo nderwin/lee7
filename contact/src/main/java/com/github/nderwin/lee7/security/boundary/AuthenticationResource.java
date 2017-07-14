@@ -15,7 +15,16 @@
  */
 package com.github.nderwin.lee7.security.boundary;
 
+import com.github.nderwin.lee7.security.RsaKeystore;
 import com.github.nderwin.lee7.security.entity.User;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSSigner;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.security.PermitAll;
@@ -24,8 +33,8 @@ import javax.ejb.Stateless;
 import javax.ejb.LocalBean;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.inject.Inject;
 import javax.json.Json;
-import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -51,13 +60,16 @@ import org.mindrot.BCrypt;
 @Path("/authentication")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@RolesAllowed({"user"})
+@RolesAllowed({"USER"})
 public class AuthenticationResource {
 
     private static final Logger LOG = Logger.getLogger(AuthenticationResource.class.getName());
 
     @PersistenceContext
     EntityManager em;
+    
+    @Inject
+    RsaKeystore keystore;
 
     @POST
     @Path("/login")
@@ -71,8 +83,28 @@ public class AuthenticationResource {
                     .getSingleResult();
 
             if (BCrypt.checkpw(body.getPassword(), user.getPassword())) {
+                JWSSigner signer = new RSASSASigner(keystore.getPrivateKey());
                 
-                job.add("token", "12345");
+                Date now = new Date();
+
+                JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+                        .subject(user.getUsername())
+                        .issuer("lee7")
+                        .expirationTime(new Date(now.getTime() + (60 * 1000)))
+                        .issueTime(now)
+                        .notBeforeTime(now)
+                        .claim("roles", user.getRoles())
+                        .build();
+
+                SignedJWT jwt = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), claimsSet);
+
+                try {
+                    jwt.sign(signer);
+                } catch (JOSEException ex) {
+                    throw new RuntimeException(ex);
+                }
+                
+                job.add("token", jwt.serialize());
 
                 return Response.ok(job.build()).build();
             } else {

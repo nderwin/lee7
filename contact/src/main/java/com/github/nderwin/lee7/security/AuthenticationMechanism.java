@@ -15,9 +15,11 @@
  */
 package com.github.nderwin.lee7.security;
 
-import java.util.Arrays;
-import java.util.HashSet;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+import java.text.ParseException;
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.security.enterprise.AuthenticationException;
 import javax.security.enterprise.AuthenticationStatus;
 import javax.security.enterprise.authentication.mechanism.http.HttpAuthenticationMechanism;
@@ -25,6 +27,9 @@ import javax.security.enterprise.authentication.mechanism.http.HttpMessageContex
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.HttpHeaders;
+import net.minidev.json.JSONArray;
+
+import static java.util.stream.Collectors.toSet;
 
 /**
  *
@@ -34,6 +39,9 @@ import javax.ws.rs.core.HttpHeaders;
 public class AuthenticationMechanism implements HttpAuthenticationMechanism {
 
     private static final String BEARER = "Bearer ";
+    
+    @Inject
+    RsaKeystore keystore;
 
     @Override
     public AuthenticationStatus validateRequest(final HttpServletRequest request, final HttpServletResponse response, final HttpMessageContext httpMessageContext) throws AuthenticationException {
@@ -41,9 +49,18 @@ public class AuthenticationMechanism implements HttpAuthenticationMechanism {
         
         if (null != authHeader && authHeader.startsWith(BEARER)) {
             String token = authHeader.substring(BEARER.length());
+            
+            try {
+                SignedJWT jwt = SignedJWT.parse(token);
+                JWTClaimsSet claims = jwt.getJWTClaimsSet();
+                JSONArray roles = (JSONArray) claims.getClaim("roles");
 
-            // TODO - parse token, fill in subject, roles
-            return httpMessageContext.notifyContainerAboutLogin("uzer", new HashSet<>(Arrays.asList("user")));
+                return httpMessageContext.notifyContainerAboutLogin(claims.getSubject(), roles.stream().map(r -> r.toString()).collect(toSet()));
+            } catch (ParseException ex) {
+                // TODO - probably should be something else...
+                // TODO - logging
+                return httpMessageContext.doNothing();
+            }
         }
         
         return httpMessageContext.doNothing();

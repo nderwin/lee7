@@ -15,7 +15,7 @@
             <url-pattern>/contact/resources/*</url-pattern>
         </web-resource-collection>
         <auth-constraint>
-            <role-name>user</role-name>
+            <role-name>USER</role-name>
         </auth-constraint>
     </security-constraint>
 </web-app>

@@ -15,9 +15,15 @@
  */
 package com.github.nderwin.lee7.security;
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import java.text.ParseException;
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.security.enterprise.AuthenticationException;
@@ -38,6 +44,8 @@ import static java.util.stream.Collectors.toSet;
 @RequestScoped
 public class AuthenticationMechanism implements HttpAuthenticationMechanism {
 
+    private static final Logger LOG = Logger.getLogger(AuthenticationMechanism.class.getName());
+    
     private static final String BEARER = "Bearer ";
     
     @Inject
@@ -52,13 +60,24 @@ public class AuthenticationMechanism implements HttpAuthenticationMechanism {
             
             try {
                 SignedJWT jwt = SignedJWT.parse(token);
-                JWTClaimsSet claims = jwt.getJWTClaimsSet();
-                JSONArray roles = (JSONArray) claims.getClaim("roles");
+                
+                JWSVerifier verifier = new RSASSAVerifier(keystore.getPublicKey());
+                if (jwt.verify(verifier)) {
+                    JWTClaimsSet claims = jwt.getJWTClaimsSet();
+                    
+                    Date now = new Date();
+                    if (claims.getNotBeforeTime().before(now) || claims.getExpirationTime().after(now)) {
+                        return httpMessageContext.doNothing();
+                    }
 
-                return httpMessageContext.notifyContainerAboutLogin(claims.getSubject(), roles.stream().map(r -> r.toString()).collect(toSet()));
-            } catch (ParseException ex) {
-                // TODO - probably should be something else...
-                // TODO - logging
+                    JSONArray roles = (JSONArray) claims.getClaim("roles");
+
+                    return httpMessageContext.notifyContainerAboutLogin(claims.getSubject(), roles.stream().map(r -> r.toString()).collect(toSet()));
+                } else {
+                    return httpMessageContext.doNothing();
+                }
+            } catch (ParseException | JOSEException ex) {
+                LOG.log(Level.WARNING, ex.getMessage(), ex);
                 return httpMessageContext.doNothing();
             }
         }

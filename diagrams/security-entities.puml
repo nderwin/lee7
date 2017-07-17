@@ -1,0 +1,49 @@
+@startuml
+
+hide circle
+hide stereotype
+
+skinparam class {
+    ArrowColor black
+    BackgroundColor white
+    BackgroundColor<<Description>> lightblue
+    BackgroundColor<<MomentInterval>> pink
+    BackgroundColor<<Role>> lightgoldenrodyellow
+    BackgroundColor<<PersonPlaceThing>> lightgreen
+    BorderColor black
+}
+
+package java.io {
+    interface Serializable
+}
+
+package security.entity <<Folder>> {
+    enum Role<<Role>> {
+        USER
+        ADMIN
+    }
+
+    class User<<PersonPlaceThing>> {
+        -id : Long
+        -username : String
+        -password : String
+        __
+        #User()
+        +User(username : String)
+        __
+        +getId() : Long
+        +getUsername() : String
+        +getPassword() : String
+        +setPassword(password : String) : void
+        +getRoles() : Set<Role>
+        +addRole(role : Role) : boolean
+        +removeRole(role : Role) : boolean
+        +equals(other : Object) : boolean
+        +hashCode() : int
+    }
+
+    User .up.|> Serializable
+    User o-right- Role : roles
+}
+
+@enduml

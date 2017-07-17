@@ -1,0 +1,67 @@
+@startuml
+
+hide circle
+hide stereotype
+
+skinparam class {
+    ArrowColor black
+    BackgroundColor white
+    BackgroundColor<<Description>> lightblue
+    BackgroundColor<<MomentInterval>> pink
+    BackgroundColor<<Role>> lightgoldenrodyellow
+    BackgroundColor<<PersonPlaceThing>> lightgreen
+    BorderColor black
+}
+
+package java.io {
+    interface Serializable
+}
+
+package contact.entity <<Folder>> {
+    abstract class LegalEntity<<PersonPlaceThing>> {
+        -{static} serialVersionUID : long
+        -id : Long
+
+        +getId() : Long
+    }
+
+    class Person<<PersonPlaceThing>> {
+        -{static} serialVersionUID : long
+        -surname : String
+        -givenName : String
+
+        __
+        #Person()
+        +Person(surname : String, givenName : String)
+        __
+        +getSurname() : String
+        +setSurname(surname : String) : void
+        +getGivenName() : String
+        +setGivenName(givenName : String) : void
+        +equals(other : Object) : boolean
+        +hashCode() : int
+        +toString() : String
+    }
+
+    class Organization<<PersonPlaceThing>> {
+        -{static} serialVersionUID : long
+        -name : String
+
+        __
+        #Organization()
+        +Organization(name : String)
+        __
+        +getName() : String
+        +setName(name : String) : void
+        +equals(other : Object) : boolean
+        +hashCode() : int
+        +toString() : String
+    }
+
+    LegalEntity .up.|> Serializable
+    LegalEntity <|-- Person
+    LegalEntity <|-- Organization
+    Person .up.|> Serializable
+    Organization .left.|> Serializable
+}
+@enduml

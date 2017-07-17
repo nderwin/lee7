@@ -1,0 +1,52 @@
+@startuml
+
+hide circle
+hide stereotype
+
+skinparam class {
+    ArrowColor black
+    BackgroundColor white
+    BackgroundColor<<Description>> lightblue
+    BackgroundColor<<MomentInterval>> pink
+    BackgroundColor<<Role>> lightgoldenrodyellow
+    BackgroundColor<<PersonPlaceThing>> lightgreen
+    BorderColor black
+}
+
+namespace contact <<Folder>> {
+    class ApplicationConfig<<Description>>
+    class ResourceExceptionMapper<<Description>>
+    
+    namespace boundary <<Folder>> {
+        class PersonResource<<MomentInterval>>
+        class OrganizationResource<<MomentInterval>>
+        class PagingListWrapper<T><<Description>>
+
+        PersonResource --> PagingListWrapper
+        OrganizationResource --> PagingListWrapper
+    }
+
+    namespace entity <<Folder>> {
+        abstract class LegalEntity<<PersonPlaceThing>>
+        class Person<<PersonPlaceThing>>
+        class Organization<<PersonPlaceThing>>
+
+        LegalEntity <|-- Person
+        LegalEntity <|-- Organization
+    }
+}
+
+namespace security <<Folder>> {
+    class AuthenticationMechanism<<MomentInterval>>
+
+    namespace boundary <<Folder>> {
+        class AuthenticationResource<<MomentInterval>>
+    }
+
+    namespace entity <<Folder>> {
+        class Role<<Role>>
+        class User<<PersonPlaceThing>>
+    }
+}
+
+@enduml

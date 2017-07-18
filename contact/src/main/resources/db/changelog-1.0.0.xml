@@ -83,4 +83,21 @@ limitations under the License.
             constraintName="FK_user_role_user_id" 
             referencedTableSchemaName="contact" referencedTableName="user" referencedColumnNames="id" />
     </changeSet>
+
+    <changeSet id="create-token-invalidation-cache" author="nderwin">
+        <comment>Create the table to store invalidated auth tokens</comment>
+        
+        <createTable schemaName="contact" tableName="invalid_token">
+            <column name="token" type="VARCHAR(8192)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK_invalid_token" />
+            </column>
+            <column name="expiration_date" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        
+        <createIndex schemaName="contact" tableName="invalid_token" indexName="IDX_invalid_token_expiration_date">
+            <column name="expiration_date" />
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>

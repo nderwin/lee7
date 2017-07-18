@@ -16,6 +16,7 @@
 package com.github.nderwin.lee7.security.boundary;
 
 import com.github.nderwin.lee7.security.RsaKeystore;
+import com.github.nderwin.lee7.security.entity.InvalidToken;
 import com.github.nderwin.lee7.security.entity.User;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -24,6 +25,7 @@ import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,12 +42,15 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.mindrot.BCrypt;
@@ -64,6 +69,8 @@ import org.mindrot.BCrypt;
 public class AuthenticationResource {
 
     private static final Logger LOG = Logger.getLogger(AuthenticationResource.class.getName());
+
+    private static final String BEARER = "Bearer ";
 
     @PersistenceContext
     EntityManager em;
@@ -125,8 +132,21 @@ public class AuthenticationResource {
     @PUT
     @POST
     @Path("/logout")
-    public Response logout() {
-        // TODO - invalidate the token
+    public Response logout(@Context HttpServletRequest request) {
+        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        String token = authHeader.substring(BEARER.length());
+
+        try {
+            SignedJWT jwt = SignedJWT.parse(token);
+            
+            InvalidToken it = new InvalidToken(token, jwt.getJWTClaimsSet().getExpirationTime());
+            em.persist(it);
+        } catch (ParseException ex) {
+            LOG.log(Level.SEVERE, ex.getMessage(), ex);
+            // TODO - better status?
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+        
         return Response.ok().build();
     }
 }

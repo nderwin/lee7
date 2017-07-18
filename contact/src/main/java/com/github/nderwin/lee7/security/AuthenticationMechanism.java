@@ -15,6 +15,7 @@
  */
 package com.github.nderwin.lee7.security;
 
+import com.github.nderwin.lee7.security.entity.InvalidToken;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
@@ -26,6 +27,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.security.enterprise.AuthenticationException;
 import javax.security.enterprise.AuthenticationStatus;
 import javax.security.enterprise.authentication.mechanism.http.HttpAuthenticationMechanism;
@@ -48,6 +51,9 @@ public class AuthenticationMechanism implements HttpAuthenticationMechanism {
     
     private static final String BEARER = "Bearer ";
     
+    @PersistenceContext
+    EntityManager em;
+    
     @Inject
     RsaKeystore keystore;
 
@@ -58,27 +64,31 @@ public class AuthenticationMechanism implements HttpAuthenticationMechanism {
         if (null != authHeader && authHeader.startsWith(BEARER)) {
             String token = authHeader.substring(BEARER.length());
             
-            try {
-                SignedJWT jwt = SignedJWT.parse(token);
-                
-                JWSVerifier verifier = new RSASSAVerifier(keystore.getPublicKey());
-                if (jwt.verify(verifier)) {
-                    JWTClaimsSet claims = jwt.getJWTClaimsSet();
-                    
-                    Date now = new Date();
-                    if (claims.getNotBeforeTime().before(now) || claims.getExpirationTime().after(now)) {
+            if (null == em.find(InvalidToken.class, token)) {
+                try {
+                    SignedJWT jwt = SignedJWT.parse(token);
+
+                    JWSVerifier verifier = new RSASSAVerifier(keystore.getPublicKey());
+                    if (jwt.verify(verifier)) {
+                        JWTClaimsSet claims = jwt.getJWTClaimsSet();
+
+                        Date now = new Date();
+                        if (claims.getNotBeforeTime().after(now) || claims.getExpirationTime().before(now)) {
+                            return httpMessageContext.doNothing();
+                        }
+
+                        JSONArray roles = (JSONArray) claims.getClaim("roles");
+
+                        return httpMessageContext.notifyContainerAboutLogin(claims.getSubject(), roles.stream().map(r -> r.toString()).collect(toSet()));
+                    } else {
                         return httpMessageContext.doNothing();
                     }
-
-                    JSONArray roles = (JSONArray) claims.getClaim("roles");
-
-                    return httpMessageContext.notifyContainerAboutLogin(claims.getSubject(), roles.stream().map(r -> r.toString()).collect(toSet()));
-                } else {
+                } catch (ParseException | JOSEException ex) {
+                    LOG.log(Level.WARNING, ex.getMessage(), ex);
                     return httpMessageContext.doNothing();
                 }
-            } catch (ParseException | JOSEException ex) {
-                LOG.log(Level.WARNING, ex.getMessage(), ex);
-                return httpMessageContext.doNothing();
+            } else {
+                return httpMessageContext.responseUnauthorized();
             }
         }
         

@@ -1,0 +1,23 @@
+version: '3.1'
+
+services:
+    database:
+        image: postgres:9.6.3
+        container_name: lee7_db
+        environment:
+            POSTGRES_USER_FILE: /run/secrets/postgres_username
+            POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+            POSTGRES_DB: lee7
+        volumes:
+          - ./src/main/resources/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+        ports:
+          - "5432:5432"
+        secrets:
+          - postgres_username
+          - postgres_password
+
+secrets:
+    postgres_username:
+        file: ./dockersecrets/postgres_contact_username
+    postgres_password:
+        file: ./dockersecrets/postgres_contact_password

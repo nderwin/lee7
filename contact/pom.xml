@@ -50,12 +50,12 @@
         <dependency>
             <groupId>javax.security.enterprise</groupId>
             <artifactId>javax.security.enterprise-api</artifactId>
-            <version>1.0-b08-SNAPSHOT</version>
+            <version>1.0-b09</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.soteria</groupId>
             <artifactId>javax.security.enterprise</artifactId>
-            <version>1.0-b08-SNAPSHOT</version>
+            <version>1.0-b10</version>
         </dependency>
         
         <!-- For passwords -->

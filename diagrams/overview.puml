@@ -49,4 +49,6 @@ namespace security <<Folder>> {
     }
 }
 
+security -[hidden]- contact
+
 @enduml

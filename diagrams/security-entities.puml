@@ -43,7 +43,22 @@ package security.entity <<Folder>> {
     }
 
     User .up.|> Serializable
-    User o-right- Role : roles
+    User -down- Role : roles
+
+    class InvalidToken<<PersonPlaceThing>> {
+        -token : String
+        -expirationDate : Date
+        __
+        #InvalidToken()
+        +InvalidToken(token : String, expirationDate : Date)
+        __
+        +getToken() : String
+        +getExpirationDate() : Date
+        +equals(other : Object) : boolean
+        +hashCode() : int
+    }
+
+    InvalidToken .up.|> Serializable
 }
 
 @enduml

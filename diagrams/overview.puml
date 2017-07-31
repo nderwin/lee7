@@ -13,20 +13,24 @@ skinparam class {
     BorderColor black
 }
 
-namespace contact <<Folder>> {
+namespace contact {
     class ApplicationConfig<<Description>>
     class ResourceExceptionMapper<<Description>>
+
+    ResourceExceptionMapper -[hidden]left- ApplicationConfig
+    entity -[hidden]up- ApplicationConfig
+    boundary -[hidden]up- ResourceExceptionMapper
     
-    namespace boundary <<Folder>> {
+    namespace boundary {
         class PersonResource<<MomentInterval>>
         class OrganizationResource<<MomentInterval>>
         class PagingListWrapper<T><<Description>>
 
-        PersonResource --> PagingListWrapper
-        OrganizationResource --> PagingListWrapper
+        PagingListWrapper <-- PersonResource
+        PagingListWrapper <-- OrganizationResource
     }
 
-    namespace entity <<Folder>> {
+    namespace entity {
         abstract class LegalEntity<<PersonPlaceThing>>
         class Person<<PersonPlaceThing>>
         class Organization<<PersonPlaceThing>>
@@ -36,19 +40,31 @@ namespace contact <<Folder>> {
     }
 }
 
-namespace security <<Folder>> {
+namespace security {
     class AuthenticationMechanism<<MomentInterval>>
+    class RsaKeystore<<MomentInterval>>
 
-    namespace boundary <<Folder>> {
+    control -[hidden]up- AuthenticationMechanism
+    boundary -[hidden]up- AuthenticationMechanism
+    entity -[hidden]up- boundary
+
+    namespace boundary {
         class AuthenticationResource<<MomentInterval>>
     }
 
-    namespace entity <<Folder>> {
+    namespace control {
+        class TokenCacheTimer<<MomentInterval>>
+    }
+
+    namespace entity {
         class Role<<Role>>
         class User<<PersonPlaceThing>>
+        class InvalidToken<<PersonPlaceThing>>
+
+        User -- Role
     }
 }
 
-security -[hidden]- contact
+contact -[hidden]- security
 
 @enduml

@@ -48,14 +48,9 @@
     <dependencies>
         <!-- JSR 375 Security -->
         <dependency>
-            <groupId>javax.security.enterprise</groupId>
-            <artifactId>javax.security.enterprise-api</artifactId>
-            <version>1.0-b09</version>
-        </dependency>
-        <dependency>
             <groupId>org.glassfish.soteria</groupId>
             <artifactId>javax.security.enterprise</artifactId>
-            <version>1.0-b10</version>
+            <version>1.0</version>
         </dependency>
         
         <!-- For passwords -->
@@ -89,6 +84,30 @@
         </testResources>
         
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.0.2</version>
+                <executions>
+                    <execution>
+                        <id>copy-postgresql-jdbc-driver</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.postgresql</groupId>
+                                    <artifactId>postgresql</artifactId>
+                                    <version>42.1.1</version>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
@@ -364,6 +383,8 @@
                                 <configuration>
                                     <propertyFile>target/classes/conf/liquibase.dev.properties</propertyFile>
                                     <propertyFileWillOverride>true</propertyFileWillOverride>
+                                    <username>${db.username}</username>
+                                    <password>${db.password}</password>
                                     <changeLogFile>src/main/resources/db/changelog.xml</changeLogFile>
                                     <changelogSchemaName>contact</changelogSchemaName>
                                     <defaultSchemaName>contact</defaultSchemaName>

@@ -25,6 +25,7 @@ import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import java.security.Principal;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.logging.Level;
@@ -53,7 +54,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.mindrot.BCrypt;
+import javax.ws.rs.core.SecurityContext;
+import org.mindrot.jbcrypt.BCrypt;
 
 /**
  *
@@ -126,6 +128,18 @@ public class AuthenticationResource {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
 
+    }
+    
+    @GET
+    @Path("/")
+    public Response get(@Context SecurityContext context) {
+        JsonObjectBuilder job = Json.createObjectBuilder();
+        
+        Principal p = context.getUserPrincipal();
+        
+        job.add("username", p.getName());
+        
+        return Response.ok(job.build()).build();
     }
 
     @GET

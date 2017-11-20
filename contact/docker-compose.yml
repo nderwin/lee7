@@ -1,0 +1,39 @@
+version: '3.1'
+
+services:
+    contact:
+        image: nderwin/contact:latest
+        container_name: contact
+        depends_on: 
+          - "database"
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+          - "8080:8080"
+          - "9990:9990"
+        secrets:
+          - postgres_username
+          - postgres_password
+    database:
+        image: postgres:10.0
+        container_name: lee7_db
+        command: postgres -c log_statement=all
+        environment:
+            POSTGRES_USER_FILE: /run/secrets/postgres_username
+            POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+            POSTGRES_DB: lee7
+        volumes:
+          - ./src/main/resources/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+          - /opt/postgresql/lee7:/var/lib/postgresql/data
+        ports:
+          - "5432:5432"
+        secrets:
+          - postgres_username
+          - postgres_password
+          
+secrets:
+    postgres_username:
+        file: /opt/dockersecrets/lee7db_postgres_username
+    postgres_password:
+        file: /opt/dockersecrets/lee7db_postgres_password
